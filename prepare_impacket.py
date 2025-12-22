@@ -24,8 +24,8 @@ def ensure_path_in_profile(force=False):
         try:
             existing = path.read_text() if path.exists() else ""
         except OSError as exc:
-        output_utils.warn(f"Could not read {path}: {exc}")
-        continue
+            output_utils.warn(f"Could not read {path}: {exc}")
+            continue
 
         if IMPACKET_EXAMPLES in existing:
             if force:
