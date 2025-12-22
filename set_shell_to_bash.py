@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 import os
 import subprocess
-import sys
 from pathlib import Path
 import pwd
+
+import output_utils
 
 
 def run(cmd):
@@ -13,11 +14,11 @@ def run(cmd):
 def ensure_default_shell_bash(force=False):
     bash_path = "/bin/bash"
     if not os.path.exists(bash_path):
-        print(f"{bash_path} not found; cannot set default shell.", file=sys.stderr)
+        output_utils.warn(f"{bash_path} not found; cannot set default shell.")
         return
 
     if os.geteuid() != 0:
-        print("Root privileges required to change default shells for all users.", file=sys.stderr)
+        output_utils.warn("Root privileges required to change default shells for all users.")
         return
 
     changed_any = False
@@ -30,7 +31,7 @@ def ensure_default_shell_bash(force=False):
             continue
         result = run(["chsh", "-s", bash_path, user.pw_name])
         if result.returncode != 0:
-            sys.stderr.write(result.stderr)
+            output_utils.warn(result.stderr.strip())
         else:
             changed_any = True
 
@@ -54,7 +55,7 @@ def ensure_default_shell_bash(force=False):
             useradd_path.write_text("\n".join(lines) + "\n")
             changed_any = changed_any or updated
         except OSError as exc:
-            print(f"Could not update {useradd_path}: {exc}", file=sys.stderr)
+            output_utils.warn(f"Could not update {useradd_path}: {exc}")
 
     adduser_path = Path("/etc/adduser.conf")
     if adduser_path.exists():
@@ -77,10 +78,10 @@ def ensure_default_shell_bash(force=False):
             adduser_path.write_text("\n".join(lines) + "\n")
             changed_any = changed_any or updated
         except OSError as exc:
-            print(f"Could not update {adduser_path}: {exc}", file=sys.stderr)
+            output_utils.warn(f"Could not update {adduser_path}: {exc}")
 
     if not changed_any:
-        print("Default shell already set to bash; no changes needed.")
+        output_utils.ok("Default shell already set to bash; no changes needed.")
 
 def main(force=False):
     ensure_default_shell_bash(force=force)

@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 import apt_utils
+import output_utils
 
 IMPACKET_EXAMPLES = "/usr/lib/python3/dist-packages/impacket/examples/"
 PROFILE_FILES = [".profile", ".bashrc", ".zshrc"]
@@ -23,12 +24,12 @@ def ensure_path_in_profile(force=False):
         try:
             existing = path.read_text() if path.exists() else ""
         except OSError as exc:
-            print(f"Could not read {path}: {exc}", file=sys.stderr)
-            continue
+        output_utils.warn(f"Could not read {path}: {exc}")
+        continue
 
         if IMPACKET_EXAMPLES in existing:
             if force:
-                print(f"PATH already includes impacket examples in {path}.")
+                output_utils.ok(f"PATH already includes impacket examples in {path}.")
             continue
 
         try:
@@ -39,17 +40,17 @@ def ensure_path_in_profile(force=False):
                 f.write(line)
             updated_any = True
         except OSError as exc:
-            print(f"Could not write {path}: {exc}", file=sys.stderr)
+            output_utils.warn(f"Could not write {path}: {exc}")
 
     if not updated_any:
-        print("PATH already updated or no writable profile files found.")
+        output_utils.ok("PATH already updated or no writable profile files found.")
     else:
-        print("Updated shell profile(s). Restart your shell to pick up PATH changes.")
+        output_utils.ok("Updated shell profile(s). Restart your shell to pick up PATH changes.")
 
 
 def main(force=False):
     if not apt_utils.ensure_apt_package("python3-impacket", force=force):
-        print("python3-impacket installation not confirmed.", file=sys.stderr)
+        output_utils.warn("python3-impacket installation not confirmed.")
     ensure_path_in_profile(force=force)
 
 

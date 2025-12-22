@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import shutil
 import subprocess
-import sys
+
+import output_utils
 
 
 def run(cmd):
@@ -10,7 +11,7 @@ def run(cmd):
 
 def is_package_installed(package):
     if shutil.which("dpkg") is None:
-        print("dpkg not found; cannot verify package installation.", file=sys.stderr)
+        output_utils.warn("dpkg not found; cannot verify package installation.")
         return False
     check = run(["dpkg", "-s", package])
     return check.returncode == 0
@@ -19,16 +20,16 @@ def is_package_installed(package):
 def ensure_apt_package(package, force=False):
     installed = is_package_installed(package)
     if installed and not force:
-        print(f"{package} already installed; skipping.")
+        output_utils.ok(f"{package} already installed; skipping.")
         return True
 
     if installed and force:
-        print(f"{package} already installed; reinstalling because --force was set.")
+        output_utils.info(f"{package} already installed; reinstalling because --force was set.")
     else:
-        print(f"{package} not installed; attempting to install via apt.")
+        output_utils.info(f"{package} not installed; attempting to install via apt.")
 
     if shutil.which("sudo") is None or shutil.which("apt-get") is None:
-        print("sudo or apt-get not found; cannot install packages.", file=sys.stderr)
+        output_utils.warn("sudo or apt-get not found; cannot install packages.")
         return False
 
     update = run(["sudo", "apt-get", "update"])
@@ -41,4 +42,5 @@ def ensure_apt_package(package, force=False):
         sys.stderr.write(install.stderr)
         return False
 
+    output_utils.ok(f"{package} installed.")
     return True

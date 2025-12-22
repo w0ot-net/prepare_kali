@@ -2,6 +2,7 @@
 import argparse
 import sys
 
+import output_utils
 import prepare_impacket
 import set_shell_to_bash
 
@@ -37,15 +38,18 @@ def parse_args():
 def main():
     args = parse_args()
     if not args.all and not args.task:
-        print("No tasks selected. Use --all or --task.", file=sys.stderr)
+        output_utils.warn("No tasks selected. Use --all or --task.")
         return 2
 
     if args.all:
+        output_utils.banner("== prepare_kali :: run all ==")
         for name in sorted(TASKS.keys()):
+            output_utils.info(f"Running task: {name}")
             TASKS[name](force=args.force)
         return 0
 
     for name in args.task:
+        output_utils.banner(f"== prepare_kali :: {name} ==")
         TASKS[name](force=args.force)
     return 0
 
