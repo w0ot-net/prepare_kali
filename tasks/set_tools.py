@@ -3,8 +3,8 @@ import os
 import subprocess
 from pathlib import Path
 
-import apt_utils
-import output_utils
+from utils import apt_utils
+from utils import output_utils
 
 
 TOOLS_DIR = Path("/root/tools")

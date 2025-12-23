@@ -2,8 +2,8 @@
 import sys
 from pathlib import Path
 
-import apt_utils
-import output_utils
+from utils import apt_utils
+from utils import output_utils
 
 IMPACKET_EXAMPLES = "/usr/lib/python3/dist-packages/impacket/examples/"
 PROFILE_FILES = [".profile", ".bashrc", ".zshrc"]

@@ -2,7 +2,7 @@
 import shutil
 import subprocess
 
-import output_utils
+from utils import output_utils
 
 
 def run(cmd):

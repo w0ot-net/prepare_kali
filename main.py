@@ -2,11 +2,11 @@
 import argparse
 import sys
 
-import output_utils
-import prepare_impacket
-import set_bash_config
-import set_shell_to_bash
-import set_tools
+from tasks import prepare_impacket
+from tasks import set_bash_config
+from tasks import set_shell_to_bash
+from tasks import set_tools
+from utils import output_utils
 
 
 TASKS = {

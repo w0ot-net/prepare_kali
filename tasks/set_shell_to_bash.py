@@ -4,7 +4,7 @@ import subprocess
 from pathlib import Path
 import pwd
 
-import output_utils
+from utils import output_utils
 
 
 def run(cmd):

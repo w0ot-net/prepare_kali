@@ -2,9 +2,9 @@
 import subprocess
 from pathlib import Path
 
-import apt_utils
-import output_utils
-import set_tools
+from utils import apt_utils
+from utils import output_utils
+from tasks import set_tools
 
 
 def run(cmd, cwd=None):
