@@ -10,6 +10,10 @@ FUNCTION_BLOCK = [
     "nl2space() {",
     "    tr '\\n' ' '",
     "}",
+    "",
+    "nl2comma() {",
+    "    tr '\\n' ','",
+    "}",
 ]
 SOURCE_BLOCK = [
     "# Added by prepare_kali",

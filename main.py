@@ -42,8 +42,7 @@ def parse_args():
 def main():
     args = parse_args()
     if not args.all and not args.task:
-        output_utils.warn("No tasks selected. Use --all or --task.")
-        return 2
+        args.all = True
 
     if args.all:
         output_utils.banner("== prepare_kali :: run all ==")
