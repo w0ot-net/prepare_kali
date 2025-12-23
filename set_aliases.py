@@ -6,7 +6,10 @@ import output_utils
 
 ALIASES_FILE = Path.home() / ".aliases"
 BASHRC_FILE = Path.home() / ".bashrc"
-ALIAS_LINE = "alias ls='ls -alh --color'"
+ALIAS_LINES = [
+    "alias ls='ls -alh --color'",
+    "alias ccopy='xclip -selection c'",
+]
 SOURCE_BLOCK = [
     "# Added by prepare_kali",
     'if [ -f "$HOME/.aliases" ]; then',
@@ -24,15 +27,16 @@ def ensure_aliases_file(force=False):
             output_utils.warn(f"Could not read {ALIASES_FILE}: {exc}")
             return False
 
-    if ALIAS_LINE in existing and not force:
-        output_utils.ok(f"Alias already present in {ALIASES_FILE}.")
+    missing = [line for line in ALIAS_LINES if line not in existing]
+    if not missing and not force:
+        output_utils.ok(f"Aliases already present in {ALIASES_FILE}.")
         return True
 
     try:
         lines = existing.splitlines() if existing else []
         if lines and lines[-1] != "":
             lines.append("")
-        lines.append(ALIAS_LINE)
+        lines.extend(missing or ALIAS_LINES)
         ALIASES_FILE.write_text("\n".join(lines) + "\n")
     except OSError as exc:
         output_utils.warn(f"Could not write {ALIASES_FILE}: {exc}")
