@@ -4,16 +4,14 @@ import sys
 
 import output_utils
 import prepare_impacket
-import set_aliases
-import set_bash_functions
+import set_bash_config
 import set_shell_to_bash
 import set_tools
 
 
 TASKS = {
     "prepare_impacket": prepare_impacket.main,
-    "set_aliases": set_aliases.main,
-    "set_bash_functions": set_bash_functions.main,
+    "set_bash_config": set_bash_config.main,
     "set_shell_to_bash": set_shell_to_bash.main,
     "set_tools": set_tools.main,
 }
@@ -51,13 +49,13 @@ def main():
         for name in sorted(TASKS.keys()):
             output_utils.info(f"Running task: {name}")
             TASKS[name](force=args.force)
-        output_utils.info('Run: source ~/.bashrc; source ~/.aliases; source ~/.bash_functions')
+        output_utils.info('Run: source ~/.bashrc')
         return 0
 
     for name in args.task:
         output_utils.banner(f"== prepare_kali :: {name} ==")
         TASKS[name](force=args.force)
-    output_utils.info('Run: source ~/.bashrc; source ~/.aliases; source ~/.bash_functions')
+    output_utils.info('Run: source ~/.bashrc')
     return 0
 
 

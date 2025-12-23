@@ -15,6 +15,7 @@ REPOS = [
     "https://github.com/w0ot-net/url_grabber",
     "https://github.com/w0ot-net/tls_auditor",
     "https://github.com/w0ot-net/ssh_auditor",
+    "https://github.com/w0ot-net/bash_config",
 ]
 
 
