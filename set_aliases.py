@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
 
+import apt_utils
 import output_utils
 
 
@@ -75,6 +76,7 @@ def ensure_bashrc_sources_aliases(force=False):
 
 
 def main(force=False):
+    apt_utils.ensure_apt_package("xclip", force=force)
     ensure_aliases_file(force=force)
     ensure_bashrc_sources_aliases(force=force)
 
