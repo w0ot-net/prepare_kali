@@ -5,12 +5,14 @@ import sys
 import output_utils
 import prepare_impacket
 import set_aliases
+import set_bash_functions
 import set_shell_to_bash
 
 
 TASKS = {
     "prepare_impacket": prepare_impacket.main,
     "set_aliases": set_aliases.main,
+    "set_bash_functions": set_bash_functions.main,
     "set_shell_to_bash": set_shell_to_bash.main,
 }
 
