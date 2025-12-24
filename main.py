@@ -4,6 +4,7 @@ import sys
 
 from tasks import prepare_impacket
 from tasks import set_bash_config
+from tasks import install_packages
 from tasks import set_shell_to_bash
 from tasks import set_tools
 from utils import output_utils
@@ -12,6 +13,7 @@ from utils import output_utils
 TASKS = {
     "prepare_impacket": prepare_impacket.main,
     "set_bash_config": set_bash_config.main,
+    "install_packages": install_packages.main,
     "set_shell_to_bash": set_shell_to_bash.main,
     "set_tools": set_tools.main,
 }
