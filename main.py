@@ -50,13 +50,19 @@ def main():
         output_utils.banner("== prepare_kali :: run all ==")
         for name in sorted(TASKS.keys()):
             output_utils.info(f"Running task: {name}")
-            TASKS[name](force=args.force)
+            result = TASKS[name](force=args.force)
+            if result is False:
+                output_utils.warn(f"Task failed: {name}")
+                return 1
         output_utils.info('Run: source ~/.bashrc')
         return 0
 
     for name in args.task:
         output_utils.banner(f"== prepare_kali :: {name} ==")
-        TASKS[name](force=args.force)
+        result = TASKS[name](force=args.force)
+        if result is False:
+            output_utils.warn(f"Task failed: {name}")
+            return 1
     output_utils.info('Run: source ~/.bashrc')
     return 0
 

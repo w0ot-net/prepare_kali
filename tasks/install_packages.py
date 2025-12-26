@@ -12,7 +12,9 @@ PACKAGES = [
 
 def main(force=False):
     for package in PACKAGES:
-        apt_utils.ensure_apt_package(package, force=force)
+        if not apt_utils.ensure_apt_package(package, force=force):
+            return False
+    return True
 
 
 if __name__ == "__main__":
