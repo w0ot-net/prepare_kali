@@ -20,7 +20,7 @@ TASKS = {
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Prepare Kali tasks runner.")
+    parser = argparse.ArgumentParser(description="Prepare Debian-based tasks runner.")
     parser.add_argument(
         "--all",
         action="store_true",
@@ -47,7 +47,7 @@ def main():
         args.all = True
 
     if args.all:
-        output_utils.banner("== prepare_kali :: run all ==")
+        output_utils.banner("== prepare_debian :: run all ==")
         for name in sorted(TASKS.keys()):
             output_utils.info(f"Running task: {name}")
             result = TASKS[name](force=args.force)
@@ -58,7 +58,7 @@ def main():
         return 0
 
     for name in args.task:
-        output_utils.banner(f"== prepare_kali :: {name} ==")
+        output_utils.banner(f"== prepare_debian :: {name} ==")
         result = TASKS[name](force=args.force)
         if result is False:
             output_utils.warn(f"Task failed: {name}")

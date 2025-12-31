@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 import subprocess
-from pathlib import Path
 
 from utils import apt_utils
 from utils import output_utils
 from tasks import set_tools
+
+
+BASH_CONFIG_URL = "https://github.com/w0ot-net/bash_config"
 
 
 def run(cmd, cwd=None):
@@ -12,12 +14,11 @@ def run(cmd, cwd=None):
 
 
 def ensure_bash_config_repo(force=False):
-    url = "https://github.com/w0ot-net/bash_config"
-    return set_tools.ensure_repo(url, force=force)
+    return set_tools.ensure_repo(BASH_CONFIG_URL, force=force)
 
 
 def run_install():
-    repo_dir = Path("/root/tools/bash_config")
+    repo_dir = set_tools.repo_dir(BASH_CONFIG_URL)
     install_script = repo_dir / "install.py"
     if not install_script.exists():
         output_utils.warn(f"Missing {install_script}; cannot install bash_config.")

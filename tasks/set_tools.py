@@ -7,7 +7,7 @@ from utils import apt_utils
 from utils import output_utils
 
 
-TOOLS_DIR = Path("/root/tools")
+TOOLS_DIR = Path(os.path.expanduser("~")) / "tools"
 REPOS = [
     "https://github.com/w0ot-net/share_sniffer",
     "https://github.com/w0ot-net/ad_spray",
