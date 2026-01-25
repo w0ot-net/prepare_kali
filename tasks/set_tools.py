@@ -12,7 +12,6 @@ REPOS = [
     "https://github.com/w0ot-net/share_sniffer",
     "https://github.com/w0ot-net/ad_spray",
     "https://github.com/w0ot-net/password_generator",
-    "https://github.com/w0ot-net/url_grabber",
     "https://github.com/w0ot-net/tls_auditor",
     "https://github.com/w0ot-net/ssh_auditor",
     "https://github.com/w0ot-net/bash_config",
