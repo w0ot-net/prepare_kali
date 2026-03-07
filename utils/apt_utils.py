@@ -18,6 +18,17 @@ def is_package_installed(package):
     return check.returncode == 0
 
 
+def update_apt_cache():
+    if shutil.which("sudo") is None or shutil.which("apt-get") is None:
+        output_utils.warn("sudo or apt-get not found; cannot update package cache.")
+        return False
+    result = run(["sudo", "apt-get", "update"])
+    if result.returncode != 0:
+        sys.stderr.write(result.stderr)
+        return False
+    return True
+
+
 def ensure_apt_package(package, force=False):
     installed = is_package_installed(package)
     if installed and not force:
@@ -31,11 +42,6 @@ def ensure_apt_package(package, force=False):
 
     if shutil.which("sudo") is None or shutil.which("apt-get") is None:
         output_utils.warn("sudo or apt-get not found; cannot install packages.")
-        return False
-
-    update = run(["sudo", "apt-get", "update"])
-    if update.returncode != 0:
-        sys.stderr.write(update.stderr)
         return False
 
     install = run(["sudo", "apt-get", "install", "-y", package])

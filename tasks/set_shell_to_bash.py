@@ -40,9 +40,11 @@ def ensure_default_shell_bash(force=False):
         try:
             content = useradd_path.read_text()
             lines = []
+            found = False
             updated = False
             for line in content.splitlines():
                 if line.startswith("SHELL="):
+                    found = True
                     if line != f"SHELL={bash_path}" or force:
                         lines.append(f"SHELL={bash_path}")
                         updated = True
@@ -50,8 +52,9 @@ def ensure_default_shell_bash(force=False):
                         lines.append(line)
                 else:
                     lines.append(line)
-            if not updated:
+            if not found:
                 lines.append(f"SHELL={bash_path}")
+                updated = True
             useradd_path.write_text("\n".join(lines) + "\n")
             changed_any = changed_any or updated
         except OSError as exc:
@@ -62,9 +65,11 @@ def ensure_default_shell_bash(force=False):
         try:
             content = adduser_path.read_text()
             lines = []
+            found = False
             updated = False
             for line in content.splitlines():
                 if line.startswith("DSHELL="):
+                    found = True
                     desired = f'DSHELL="{bash_path}"'
                     if line != desired or force:
                         lines.append(desired)
@@ -73,8 +78,9 @@ def ensure_default_shell_bash(force=False):
                         lines.append(line)
                 else:
                     lines.append(line)
-            if not updated:
+            if not found:
                 lines.append(f'DSHELL="{bash_path}"')
+                updated = True
             adduser_path.write_text("\n".join(lines) + "\n")
             changed_any = changed_any or updated
         except OSError as exc:

@@ -3,6 +3,8 @@ from utils import apt_utils
 
 
 PACKAGES = [
+    "git",
+    "python3-impacket",
     "python3-paramiko",
     "python3-psycopg2",
     "python3-pymssql",
@@ -11,6 +13,7 @@ PACKAGES = [
 
 
 def main(force=False):
+    apt_utils.update_apt_cache()
     for package in PACKAGES:
         if not apt_utils.ensure_apt_package(package, force=force):
             return False

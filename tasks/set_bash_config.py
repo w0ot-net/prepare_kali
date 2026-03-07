@@ -34,6 +34,7 @@ def run_install():
 
 
 def main(force=False):
+    apt_utils.update_apt_cache()
     apt_utils.ensure_apt_package("git", force=force)
     apt_utils.ensure_apt_package("xclip", force=force)
     if not set_tools.ensure_tools_dir():

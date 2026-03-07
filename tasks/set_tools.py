@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
-import os
 import subprocess
 from pathlib import Path
 
-from utils import apt_utils
 from utils import output_utils
 
 
-TOOLS_DIR = Path(os.path.expanduser("~")) / "tools"
+TOOLS_DIR = Path.home() / "tools"
 REPOS = [
     "https://github.com/w0ot-net/share_sniffer",
     "https://github.com/w0ot-net/ad_spray",
     "https://github.com/w0ot-net/password_generator",
     "https://github.com/w0ot-net/tls_auditor",
     "https://github.com/w0ot-net/ssh_auditor",
-    "https://github.com/w0ot-net/bash_config",
     "https://github.com/w0ot-net/db_brute",
     "https://github.com/w0ot-net/service_organizer",
 ]
@@ -66,7 +63,6 @@ def ensure_repo(url, force=False):
 
 
 def main(force=False):
-    apt_utils.ensure_apt_package("git", force=force)
     if not ensure_tools_dir():
         return
     for url in REPOS:
