@@ -57,3 +57,23 @@ Change `set_tools.TOOLS_DIR` to use `Path.home()`. Update `set_bash_config.run_i
 - `tasks/install_packages.py`: Call `update_apt_cache()` before the package loop.
 - `tasks/set_bash_config.py`: Call `update_apt_cache()` before package installs; derive repo path from `set_tools.TOOLS_DIR`.
 - `tasks/set_tools.py`: Change `TOOLS_DIR` to `Path.home() / "tools"`; remove `bash_config` from `REPOS`.
+
+## Execution Notes
+
+Executed on 2026-03-07.
+
+### Deviations from plan
+
+- **1a skipped**: `import sys` was already present in the current `apt_utils.py` (fixed in a prior commit on remote).
+- **2c partially done**: `set_bash_config.py` already used `set_tools.repo_dir()` instead of hardcoded path. `set_tools.py` had been changed to use `os.path.expanduser("~")` but was missing `import os` — fixed by switching to `Path.home()` which needs no extra import.
+
+### Items implemented
+
+- 1b: Added `found` boolean to both useradd and adduser.conf blocks in `set_shell_to_bash.py`
+- 2a: Extracted `update_apt_cache()` in `apt_utils.py`; callers (`install_packages`, `set_bash_config`) call it before package installs
+- 2b: Removed `bash_config` from `set_tools.REPOS`
+- 2c: Changed `TOOLS_DIR` to `Path.home() / "tools"`
+
+### Commits
+
+- `6f234db`: Fix bugs and design issues across tasks and utils
