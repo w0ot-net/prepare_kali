@@ -39,10 +39,7 @@ def ensure_repo(url, force=False):
     if path.exists():
         git_dir = path / ".git"
         if git_dir.exists():
-            if force:
-                output_utils.info(f"Updating {path} (force).")
-            else:
-                output_utils.info(f"Updating {path}.")
+            output_utils.info(f"Updating {path}.")
             result = run(["git", "-C", str(path), "pull", "--ff-only"])
             if result.returncode != 0:
                 output_utils.warn(result.stderr.strip() or f"Failed to update {path}.")
