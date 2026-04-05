@@ -14,6 +14,7 @@ REPOS = [
     "https://github.com/w0ot-net/ssh_auditor",
     "https://github.com/w0ot-net/db_brute",
     "https://github.com/w0ot-net/service_organizer",
+    "https://github.com/w0ot-net/ad_account_unlocker",
 ]
 
 
