@@ -97,3 +97,14 @@ minimum plus one newer interpreter without adding an unsupported-platform promis
   in least-privilege CI on both configured interpreters.
 - Smoke tests prove imports and CLI discovery/delegation are side-effect-free.
 - No runtime behavior or production abstraction changed solely to satisfy tooling.
+
+## Execution Notes
+
+- Added the `dev` extra, focused pytest/Ruff/mypy configuration, pinned read-only CI,
+  annotations, CLI smoke coverage, and local development commands in commit `eaa3295`.
+- Preserved the existing agent configuration tests discovered after the plan was
+  written; this was a bounded current-code correction with no scope change.
+- Validated in a dedicated Python 3.12 virtual environment: 7 tests passed, Ruff lint
+  and format checks passed, mypy reported no issues, and `git diff --check` passed.
+- The host system Python correctly refused direct editable installation under PEP 668;
+  validation used the clean virtual environment required by the plan instead.
