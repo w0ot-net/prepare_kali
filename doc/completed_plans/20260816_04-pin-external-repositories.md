@@ -145,3 +145,15 @@ name/URL and a lowercase full-length hexadecimal revision.
   is visible to the user before execution.
 - Tests validate synchronization behavior entirely with local temporary repositories,
   and the README explains how pins are reviewed and intentionally updated.
+
+## Execution Notes
+
+- Added immutable specifications for all eight tools and `bash_config`, synchronized
+  clean matching-origin worktrees to detached exact revisions, and gated installer
+  execution on verification in commit `41ec43f`.
+- Recorded upstream HEAD commits resolved on 2026-08-16 and confirmed the pinned
+  `bash_config` revision contains `install.py`.
+- Added local temporary-Git coverage for fresh/idempotent sync, pin advance/rollback,
+  dirty preservation, wrong origins, unavailable revisions, and installer gating.
+- Validated 29 passing tests, Ruff lint/format, mypy, `git diff --check`, and confirmed
+  no production `git pull` path remains.
