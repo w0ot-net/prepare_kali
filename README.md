@@ -56,7 +56,7 @@ Tasks run in alphabetical order during `--all`:
 
 | Task | Effect | Main requirements |
 | --- | --- | --- |
-| `configure_agents` | Updates the user Codex and Claude config files while preserving unrelated values. It disables commit/PR attribution and Claude session links. | Write access to `~/.codex` and `~/.claude` |
+| `configure_agents` | Disables Codex/Claude attribution, installs either CLI when missing, synchronizes the pinned coding-agent helpers, and links their skills for both CLIs. | Network access, Git, `sh`, `bash`, and write access to the user's config, `~/.local`, `~/.agents`, `~/.claude`, and `~/tools` paths |
 | `install_packages` | Updates apt metadata and installs the packages listed in `prepare_debian/tasks/install_packages.py`. | `sudo`, apt, network access |
 | `prepare_impacket` | Ensures `python3-impacket` is installed and appends its examples directory to `.profile`, `.bashrc`, and `.zshrc` under the current home directory, creating missing files. | `sudo` if installation is needed |
 | `set_bash_config` | Ensures Git and `xclip`, synchronizes `w0ot-net/bash_config` to its reviewed commit pin, and executes that revision's `install.py`. | Package-management privileges, Git, network access; executes externally maintained code |
@@ -76,6 +76,26 @@ the intended user and the system-wide shell task separately when appropriate.
 setting can be added without replacing either config file. The initial policy disables
 Codex commit attribution and all Claude commit, pull-request, and session-link
 attribution. Invalid existing Claude JSON fails without overwriting that file.
+
+The same task checks for the `codex` and `claude` commands and, when either is
+missing, downloads and executes that vendor's current official standalone installer:
+
+- Codex: `https://chatgpt.com/codex/install.sh` with `sh`.
+- Claude: `https://claude.ai/install.sh` with `bash`.
+
+These installer URLs execute current external code and are not version-pinned by this
+project. After installation the task locates the command on `PATH` or under
+`~/.local/bin` and verifies `--version`. Reload the shell if `~/.local/bin` was newly
+added to `PATH`. Signing in, choosing an account, and configuring API credentials remain
+manual steps.
+
+The `coding_agent_helpers` repository is synchronized under
+`~/tools/coding_agent_helpers` at the reviewed commit in
+`prepare_debian/repositories.py`. Each immediate child of its `skills/` directory that
+contains `SKILL.md` is symlinked into both `~/.claude/skills` and
+`~/.agents/skills`. Correct links are left unchanged and stale links owned by that
+checkout are removed. A real file, directory, or link pointing elsewhere is preserved
+and causes the task to fail rather than overwrite a user-owned skill.
 
 ### Managed repository pins
 

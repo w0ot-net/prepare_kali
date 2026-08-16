@@ -56,3 +56,9 @@ BASH_CONFIG_REPOSITORY = RepositorySpec(
     "https://github.com/w0ot-net/bash_config",
     "bb3eb930c26dea2a0c1db5b68e7e9fbf7c7e9f38",
 )
+
+CODING_AGENT_HELPERS_REPOSITORY = RepositorySpec(
+    "coding_agent_helpers",
+    "https://github.com/w0ot-net/coding_agent_helpers",
+    "d064d8edd1750054b6531865f2b260a77909bf00",
+)
