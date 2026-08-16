@@ -1,5 +1,6 @@
 from unittest import mock
 
+from prepare_debian.repositories import RepositorySpec
 from prepare_debian.tasks import (
     install_packages,
     prepare_impacket,
@@ -34,16 +35,20 @@ def test_prepare_impacket_stops_when_package_install_fails() -> None:
 
 
 def test_set_tools_aggregates_repository_failures() -> None:
+    repositories = (
+        RepositorySpec("one", "https://example.com/one", "1" * 40),
+        RepositorySpec("two", "https://example.com/two", "2" * 40),
+    )
     with (
         mock.patch.object(set_tools, "ensure_tools_dir", return_value=True),
-        mock.patch.object(set_tools, "REPOS", ["one", "two"]),
+        mock.patch.object(set_tools, "TOOL_REPOSITORIES", repositories),
         mock.patch.object(
-            set_tools, "ensure_repo", side_effect=[False, True]
+            set_tools, "synchronize_repository", side_effect=[False, True]
         ) as ensure,
     ):
         assert set_tools.main() is False
 
-    assert ensure.call_count == 2
+    ensure.assert_called_once_with(repositories[0])
 
 
 def test_bash_config_stops_before_installer_on_repository_failure() -> None:

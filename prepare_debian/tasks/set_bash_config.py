@@ -1,17 +1,16 @@
 import sys
 
+from prepare_debian.repositories import BASH_CONFIG_REPOSITORY
 from prepare_debian.tasks import set_tools
 from prepare_debian.utils import apt_utils, output_utils, process_utils
 
-BASH_CONFIG_URL = "https://github.com/w0ot-net/bash_config"
-
 
 def ensure_bash_config_repo() -> bool:
-    return set_tools.ensure_repo(BASH_CONFIG_URL)
+    return set_tools.synchronize_repository(BASH_CONFIG_REPOSITORY)
 
 
 def run_install() -> bool:
-    repo_dir = set_tools.repo_dir(BASH_CONFIG_URL)
+    repo_dir = set_tools.repository_path(BASH_CONFIG_REPOSITORY)
     install_script = repo_dir / "install.py"
     if not install_script.exists():
         output_utils.warn(f"Missing {install_script}; cannot install bash_config.")
@@ -38,4 +37,8 @@ def main() -> bool:
         return False
     if not ensure_bash_config_repo():
         return False
+    output_utils.info(
+        "Executing bash_config installer from pin "
+        f"{BASH_CONFIG_REPOSITORY.revision[:12]}."
+    )
     return run_install()
