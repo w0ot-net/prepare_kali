@@ -3,6 +3,7 @@ from collections.abc import Callable
 
 from prepare_debian.tasks import (
     configure_agents,
+    disable_screen_lock,
     install_packages,
     prepare_impacket,
     set_bash_config,
@@ -13,6 +14,7 @@ from prepare_debian.utils import output_utils
 
 TASKS: dict[str, Callable[[], bool]] = {
     "configure_agents": configure_agents.main,
+    "disable_screen_lock": disable_screen_lock.main,
     "prepare_impacket": prepare_impacket.main,
     "set_bash_config": set_bash_config.main,
     "install_packages": install_packages.main,

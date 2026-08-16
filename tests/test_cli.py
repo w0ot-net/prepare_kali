@@ -9,6 +9,7 @@ from prepare_debian import cli
 
 EXPECTED_TASKS = {
     "configure_agents",
+    "disable_screen_lock",
     "install_packages",
     "prepare_impacket",
     "set_bash_config",

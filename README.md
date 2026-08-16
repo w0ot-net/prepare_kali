@@ -34,6 +34,7 @@ Task modules are internal and are not supported as standalone scripts.
 ```sh
 prepare-debian --help
 prepare-debian --all
+prepare-debian --task disable_screen_lock
 prepare-debian --task configure_agents
 prepare-debian --task install_packages
 prepare-debian --task install_packages --task set_tools
@@ -57,8 +58,9 @@ Tasks run in alphabetical order during `--all`:
 | Task | Effect | Main requirements |
 | --- | --- | --- |
 | `configure_agents` | Disables Codex/Claude attribution, installs either CLI when missing, synchronizes the pinned coding-agent helpers, and links their skills for both CLIs. | Network access, Git, `sh`, `bash`, and write access to the user's config, `~/.local`, `~/.agents`, `~/.claude`, and `~/tools` paths |
-| `install_packages` | Updates apt metadata and installs the packages listed in `prepare_debian/tasks/install_packages.py`. | `sudo`, apt, network access |
-| `prepare_impacket` | Ensures `python3-impacket` is installed and appends its examples directory to `.profile`, `.bashrc`, and `.zshrc` under the current home directory, creating missing files. | `sudo` if installation is needed |
+| `disable_screen_lock` | Disables automatic idle screen locking and display blanking for the invoking user's active GNOME or XFCE session while preserving manual locking. | Run as the intended user inside a GNOME or XFCE graphical session; `gsettings` or `xfconf-query` |
+| `install_packages` | Updates apt metadata and installs the packages listed in `prepare_debian/tasks/install_packages.py`. | Package-management privileges, apt, network access |
+| `prepare_impacket` | Ensures `python3-impacket` is installed and appends its examples directory to `.profile`, `.bashrc`, and `.zshrc` under the current home directory, creating missing files. | Package-management privileges if installation is needed |
 | `set_bash_config` | Ensures Git and `xclip`, synchronizes `w0ot-net/bash_config` to its reviewed commit pin, and executes that revision's `install.py`. | Package-management privileges, Git, network access; executes externally maintained code |
 | `set_shell_to_bash` | Changes Bash to the login shell for root and login-capable users with UID 1000 or greater, then updates `/etc/default/useradd` and `/etc/adduser.conf` when present. | Effective root privileges, `chsh` |
 | `set_tools` | Creates `~/tools` and synchronizes configured `w0ot-net` repositories to reviewed commit pins. | Git and network access |
@@ -67,6 +69,21 @@ Tools and `bash_config` are stored under `~/tools` for the user whose home direc
 Python resolves at runtime. Running the whole command through `sudo` may therefore
 target root's home rather than the invoking user's home. Run home-directory tasks as
 the intended user and the system-wide shell task separately when appropriate.
+
+### Desktop idle locking and blanking
+
+`disable_screen_lock` detects the active desktop from `XDG_CURRENT_DESKTOP`, falling
+back to `DESKTOP_SESSION`. On GNOME it disables the session idle timeout and automatic
+lock-on-screensaver setting. On XFCE it disables idle screensaver activation,
+lock-on-screensaver activation, and power-manager DPMS for both AC and battery use.
+Every value is read back before the task succeeds.
+
+Run this task as the intended desktop user from a terminal within the graphical
+session. It intentionally weakens a physical-access security control: the desktop will
+remain visible while idle. Manual locking remains available. The task does not alter
+automatic suspend/hibernate, lid actions, brightness dimming, low-battery policy,
+display-manager login screens, or third-party lockers such as `xscreensaver` and
+`light-locker`.
 
 ### Agent configuration
 
