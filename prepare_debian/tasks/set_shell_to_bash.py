@@ -1,23 +1,31 @@
 import os
-import subprocess
-from pathlib import Path
 import pwd
+import subprocess
+from collections.abc import Sequence
+from pathlib import Path
 
 from prepare_debian.utils import output_utils
 
 
-def run(cmd):
-    return subprocess.run(cmd, check=False, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+def run(cmd: Sequence[str]) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        cmd,
+        check=False,
+        text=True,
+        capture_output=True,
+    )
 
 
-def ensure_default_shell_bash(force=False):
+def ensure_default_shell_bash(force: bool = False) -> None:
     bash_path = "/bin/bash"
     if not os.path.exists(bash_path):
         output_utils.warn(f"{bash_path} not found; cannot set default shell.")
         return
 
     if os.geteuid() != 0:
-        output_utils.warn("Root privileges required to change default shells for all users.")
+        output_utils.warn(
+            "Root privileges required to change default shells for all users."
+        )
         return
 
     changed_any = False
@@ -88,5 +96,6 @@ def ensure_default_shell_bash(force=False):
     if not changed_any:
         output_utils.ok("Default shell already set to bash; no changes needed.")
 
-def main(force=False):
+
+def main(force: bool = False) -> None:
     ensure_default_shell_bash(force=force)

@@ -92,3 +92,23 @@ Review the command output for warnings.
 - `prepare_debian/cli.py`: CLI and task registry.
 - `prepare_debian/tasks/`: task implementations.
 - `prepare_debian/utils/`: shared helpers.
+
+## Development
+
+Install the development tools into the active environment:
+
+```sh
+python -m pip install -e '.[dev]'
+```
+
+Run the same quality checks used by CI:
+
+```sh
+python -m pytest -q
+python -m ruff check .
+python -m ruff format --check .
+python -m mypy prepare_debian tests
+```
+
+Tests isolate task calls and do not perform apt, Git, shell, profile, or remote
+installer operations.

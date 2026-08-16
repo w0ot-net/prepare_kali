@@ -2,17 +2,19 @@ import json
 import os
 import re
 import tempfile
+from collections.abc import Mapping, MutableMapping
 from pathlib import Path
+from typing import Any, Optional
 
 
 class ConfigUpdateError(Exception):
     pass
 
 
-def _write_atomic(path, content):
+def _write_atomic(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     mode = path.stat().st_mode & 0o777 if path.exists() else 0o600
-    temporary_path = None
+    temporary_path: Optional[Path] = None
 
     try:
         with tempfile.NamedTemporaryFile(
@@ -32,7 +34,9 @@ def _write_atomic(path, content):
         raise
 
 
-def _merge_json_values(target, updates):
+def _merge_json_values(
+    target: MutableMapping[str, Any], updates: Mapping[str, Any]
+) -> None:
     for key, value in updates.items():
         if isinstance(value, dict) and isinstance(target.get(key), dict):
             _merge_json_values(target[key], value)
@@ -40,12 +44,14 @@ def _merge_json_values(target, updates):
             target[key] = value
 
 
-def update_json_values(path, updates):
+def update_json_values(path: Path, updates: Mapping[str, Any]) -> bool:
     if path.exists():
         try:
             values = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
-            raise ConfigUpdateError(f"Could not read JSON config {path}: {exc}") from exc
+            raise ConfigUpdateError(
+                f"Could not read JSON config {path}: {exc}"
+            ) from exc
         if not isinstance(values, dict):
             raise ConfigUpdateError(f"JSON config must contain an object: {path}")
     else:
@@ -60,7 +66,7 @@ def update_json_values(path, updates):
     return True
 
 
-def _toml_value(value):
+def _toml_value(value: object) -> str:
     if isinstance(value, str):
         return json.dumps(value)
     if isinstance(value, bool):
@@ -70,7 +76,7 @@ def _toml_value(value):
     raise ConfigUpdateError(f"Unsupported TOML value: {value!r}")
 
 
-def update_toml_values(path, updates):
+def update_toml_values(path: Path, updates: Mapping[str, object]) -> bool:
     try:
         content = path.read_text(encoding="utf-8") if path.exists() else ""
     except OSError as exc:
@@ -89,7 +95,9 @@ def update_toml_values(path, updates):
 
         pattern = re.compile(rf"^\s*{re.escape(key)}\s*=")
         matches = [
-            index for index, line in enumerate(lines[:first_table]) if pattern.match(line)
+            index
+            for index, line in enumerate(lines[:first_table])
+            if pattern.match(line)
         ]
         if len(matches) > 1:
             raise ConfigUpdateError(f"Duplicate TOML key {key!r} in {path}")

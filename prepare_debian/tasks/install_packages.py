@@ -1,7 +1,6 @@
 from prepare_debian.utils import apt_utils
 
-
-PACKAGES = [
+PACKAGES: list[str] = [
     "git",
     "python3-impacket",
     "python3-paramiko",
@@ -11,7 +10,7 @@ PACKAGES = [
 ]
 
 
-def main(force=False):
+def main(force: bool = False) -> bool:
     apt_utils.update_apt_cache()
     for package in PACKAGES:
         if not apt_utils.ensure_apt_package(package, force=force):

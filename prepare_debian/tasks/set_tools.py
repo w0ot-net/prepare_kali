@@ -1,11 +1,12 @@
 import subprocess
+from collections.abc import Sequence
 from pathlib import Path
+from typing import Optional
 
 from prepare_debian.utils import output_utils
 
-
 TOOLS_DIR = Path.home() / "tools"
-REPOS = [
+REPOS: list[str] = [
     "https://github.com/w0ot-net/share_sniffer",
     "https://github.com/w0ot-net/ad_spray",
     "https://github.com/w0ot-net/password_generator",
@@ -17,11 +18,19 @@ REPOS = [
 ]
 
 
-def run(cmd, cwd=None):
-    return subprocess.run(cmd, check=False, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
+def run(
+    cmd: Sequence[str], cwd: Optional[Path] = None
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        cmd,
+        check=False,
+        text=True,
+        capture_output=True,
+        cwd=cwd,
+    )
 
 
-def ensure_tools_dir():
+def ensure_tools_dir() -> bool:
     try:
         TOOLS_DIR.mkdir(parents=True, exist_ok=True)
     except OSError as exc:
@@ -30,11 +39,11 @@ def ensure_tools_dir():
     return True
 
 
-def repo_dir(url):
+def repo_dir(url: str) -> Path:
     return TOOLS_DIR / url.rstrip("/").split("/")[-1]
 
 
-def ensure_repo(url, force=False):
+def ensure_repo(url: str, force: bool = False) -> bool:
     path = repo_dir(url)
     if path.exists():
         git_dir = path / ".git"
@@ -59,7 +68,7 @@ def ensure_repo(url, force=False):
     return True
 
 
-def main(force=False):
+def main(force: bool = False) -> None:
     if not ensure_tools_dir():
         return
     for url in REPOS:

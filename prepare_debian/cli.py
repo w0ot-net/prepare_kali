@@ -1,16 +1,17 @@
 import argparse
-import sys
+from collections.abc import Callable
 
-from prepare_debian.tasks import configure_agents
-from prepare_debian.tasks import install_packages
-from prepare_debian.tasks import prepare_impacket
-from prepare_debian.tasks import set_bash_config
-from prepare_debian.tasks import set_shell_to_bash
-from prepare_debian.tasks import set_tools
+from prepare_debian.tasks import (
+    configure_agents,
+    install_packages,
+    prepare_impacket,
+    set_bash_config,
+    set_shell_to_bash,
+    set_tools,
+)
 from prepare_debian.utils import output_utils
 
-
-TASKS = {
+TASKS: dict[str, Callable[..., object]] = {
     "configure_agents": configure_agents.main,
     "prepare_impacket": prepare_impacket.main,
     "set_bash_config": set_bash_config.main,
@@ -20,7 +21,7 @@ TASKS = {
 }
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Prepare Debian-based tasks runner.")
     parser.add_argument(
         "--all",
@@ -42,7 +43,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def main():
+def main() -> int:
     args = parse_args()
     if not args.all and not args.task:
         args.all = True
@@ -55,7 +56,7 @@ def main():
             if result is False:
                 output_utils.warn(f"Task failed: {name}")
                 return 1
-        output_utils.info('Run: source ~/.bashrc')
+        output_utils.info("Run: source ~/.bashrc")
         return 0
 
     for name in args.task:
@@ -64,5 +65,5 @@ def main():
         if result is False:
             output_utils.warn(f"Task failed: {name}")
             return 1
-    output_utils.info('Run: source ~/.bashrc')
+    output_utils.info("Run: source ~/.bashrc")
     return 0

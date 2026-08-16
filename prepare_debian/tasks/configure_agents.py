@@ -1,15 +1,15 @@
 import os
+from collections.abc import Mapping
 from pathlib import Path
+from typing import Any, Optional
 
-from prepare_debian.utils import config_utils
-from prepare_debian.utils import output_utils
+from prepare_debian.utils import config_utils, output_utils
 
-
-CODEX_VALUES = {
+CODEX_VALUES: Mapping[str, Any] = {
     "commit_attribution": "",
 }
 
-CLAUDE_VALUES = {
+CLAUDE_VALUES: Mapping[str, Any] = {
     "attribution": {
         "commit": "",
         "pr": "",
@@ -19,7 +19,7 @@ CLAUDE_VALUES = {
 }
 
 
-def apply_agent_config(home, codex_home=None):
+def apply_agent_config(home: Path, codex_home: Optional[Path] = None) -> None:
     if codex_home is None:
         configured_codex_home = os.environ.get("CODEX_HOME")
         codex_home = (
@@ -40,7 +40,7 @@ def apply_agent_config(home, codex_home=None):
         output_utils.ok(f"{action}: {name} attribution disabled in {path}")
 
 
-def main(force=False):
+def main(force: bool = False) -> bool:
     del force
     try:
         apply_agent_config(Path.home())

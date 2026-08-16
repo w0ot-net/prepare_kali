@@ -8,7 +8,7 @@ from prepare_debian.utils import config_utils
 
 
 class AgentConfigTests(unittest.TestCase):
-    def test_disables_attribution_and_preserves_other_values(self):
+    def test_disables_attribution_and_preserves_other_values(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             home = Path(directory)
             codex_home = home / ".codex"
@@ -44,7 +44,7 @@ class AgentConfigTests(unittest.TestCase):
             )
             self.assertIs(claude_values["includeCoAuthoredBy"], False)
 
-    def test_second_update_is_a_no_op(self):
+    def test_second_update_is_a_no_op(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             home = Path(directory)
             codex_home = home / ".codex"
@@ -56,9 +56,11 @@ class AgentConfigTests(unittest.TestCase):
 
             configure_agents.apply_agent_config(home, codex_home)
 
-            self.assertEqual(before, (codex_path.read_bytes(), claude_path.read_bytes()))
+            self.assertEqual(
+                before, (codex_path.read_bytes(), claude_path.read_bytes())
+            )
 
-    def test_invalid_json_is_not_overwritten(self):
+    def test_invalid_json_is_not_overwritten(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "settings.json"
             path.write_text("not json\n", encoding="utf-8")

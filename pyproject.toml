@@ -10,6 +10,13 @@ readme = "README.md"
 requires-python = ">=3.9"
 dependencies = []
 
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.11,<2",
+    "pytest>=8,<9",
+    "ruff>=0.8,<1",
+]
+
 [project.scripts]
 prepare-debian = "prepare_debian.cli:main"
 
@@ -18,3 +25,21 @@ Repository = "https://github.com/w0ot-net/prepare_kali"
 
 [tool.setuptools.packages.find]
 include = ["prepare_debian*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.mypy]
+python_version = "3.9"
+check_untyped_defs = true
+disallow_untyped_defs = true
+warn_unused_ignores = true
+follow_imports = "skip"
+files = ["prepare_debian", "tests"]

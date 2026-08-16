@@ -1,18 +1,16 @@
-import sys
 from pathlib import Path
 
-from prepare_debian.utils import apt_utils
-from prepare_debian.utils import output_utils
+from prepare_debian.utils import apt_utils, output_utils
 
 IMPACKET_EXAMPLES = "/usr/lib/python3/dist-packages/impacket/examples/"
-PROFILE_FILES = [".profile", ".bashrc", ".zshrc"]
+PROFILE_FILES: list[str] = [".profile", ".bashrc", ".zshrc"]
 
 
-def path_export_line():
+def path_export_line() -> str:
     return f'export PATH="$PATH:{IMPACKET_EXAMPLES}"\n'
 
 
-def ensure_path_in_profile(force=False):
+def ensure_path_in_profile(force: bool = False) -> None:
     home = Path.home()
     line = path_export_line()
     comment = "# Added by prepare_impacket.py\n"
@@ -44,10 +42,12 @@ def ensure_path_in_profile(force=False):
     if not updated_any:
         output_utils.ok("PATH already updated or no writable profile files found.")
     else:
-        output_utils.ok("Updated shell profile(s). Restart your shell to pick up PATH changes.")
+        output_utils.ok(
+            "Updated shell profile(s). Restart your shell to pick up PATH changes."
+        )
 
 
-def main(force=False):
+def main(force: bool = False) -> None:
     if not apt_utils.ensure_apt_package("python3-impacket", force=force):
         output_utils.warn("python3-impacket installation not confirmed.")
     ensure_path_in_profile(force=force)

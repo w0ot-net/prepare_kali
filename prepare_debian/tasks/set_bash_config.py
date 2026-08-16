@@ -1,22 +1,31 @@
 import subprocess
+from collections.abc import Sequence
+from pathlib import Path
+from typing import Optional
 
 from prepare_debian.tasks import set_tools
-from prepare_debian.utils import apt_utils
-from prepare_debian.utils import output_utils
-
+from prepare_debian.utils import apt_utils, output_utils
 
 BASH_CONFIG_URL = "https://github.com/w0ot-net/bash_config"
 
 
-def run(cmd, cwd=None):
-    return subprocess.run(cmd, check=False, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
+def run(
+    cmd: Sequence[str], cwd: Optional[Path] = None
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        cmd,
+        check=False,
+        text=True,
+        capture_output=True,
+        cwd=cwd,
+    )
 
 
-def ensure_bash_config_repo(force=False):
+def ensure_bash_config_repo(force: bool = False) -> bool:
     return set_tools.ensure_repo(BASH_CONFIG_URL, force=force)
 
 
-def run_install():
+def run_install() -> bool:
     repo_dir = set_tools.repo_dir(BASH_CONFIG_URL)
     install_script = repo_dir / "install.py"
     if not install_script.exists():
@@ -32,7 +41,7 @@ def run_install():
     return True
 
 
-def main(force=False):
+def main(force: bool = False) -> None:
     apt_utils.update_apt_cache()
     apt_utils.ensure_apt_package("git", force=force)
     apt_utils.ensure_apt_package("xclip", force=force)
