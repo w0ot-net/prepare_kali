@@ -156,3 +156,15 @@ redesign.
 - Existing task order and mutation algorithms remain unchanged except for removed
   force-triggered repetition and failure short-circuit/aggregation.
 - There is no remaining `--force` argument or duplicated task-level subprocess wrapper.
+
+## Execution Notes
+
+- Added the shared process runner, corrected root/non-root apt invocation, removed
+  `--force`, required explicit task selection, and propagated boolean failures through
+  all existing tasks and the CLI in commit `6d94e99`.
+- Added focused CLI, process, apt, and task propagation tests without invoking real
+  system commands or filesystem targets.
+- Validated 22 passing tests, Ruff lint/format, mypy, CLI help output, `git diff --check`,
+  and confirmed the shared utility owns the only production `subprocess.run` call.
+- No repository synchronization behavior changed; mutable Git updates remained for
+  Plan 04 as required by the scope boundary.
