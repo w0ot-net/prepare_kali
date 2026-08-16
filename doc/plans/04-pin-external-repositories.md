@@ -1,5 +1,7 @@
 # Plan: Pin External Repositories
 
+*Distilled: 2026-08-15*
+
 ## Summary
 
 Replace mutable branch pulls with reviewed, immutable commit pins for every cloned

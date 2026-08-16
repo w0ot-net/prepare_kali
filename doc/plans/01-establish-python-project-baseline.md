@@ -1,5 +1,7 @@
 # Plan: Establish the Python Project Baseline
 
+*Distilled: 2026-08-15*
+
 ## Summary
 
 Turn the loose scripts into one installable `prepare_debian` package with a single

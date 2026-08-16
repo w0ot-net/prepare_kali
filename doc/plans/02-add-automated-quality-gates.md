@@ -1,5 +1,7 @@
 # Plan: Add Automated Quality Gates
 
+*Distilled: 2026-08-15*
+
 ## Summary
 
 Add one reproducible local and CI quality workflow for the packaged project from

@@ -1,5 +1,7 @@
 # Plan: Make Task Execution Safe and Truthful
 
+*Distilled: 2026-08-15*
+
 ## Summary
 
 Require an explicit task selection, make every task return a truthful boolean result,
