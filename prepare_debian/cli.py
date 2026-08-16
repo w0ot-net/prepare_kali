@@ -1,6 +1,7 @@
 import argparse
 import sys
 
+from prepare_debian.tasks import configure_agents
 from prepare_debian.tasks import install_packages
 from prepare_debian.tasks import prepare_impacket
 from prepare_debian.tasks import set_bash_config
@@ -10,6 +11,7 @@ from prepare_debian.utils import output_utils
 
 
 TASKS = {
+    "configure_agents": configure_agents.main,
     "prepare_impacket": prepare_impacket.main,
     "set_bash_config": set_bash_config.main,
     "install_packages": install_packages.main,

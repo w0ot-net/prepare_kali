@@ -34,6 +34,7 @@ Task modules are internal and are not supported as standalone scripts.
 ```sh
 prepare-debian --help
 prepare-debian --all
+prepare-debian --task configure_agents
 prepare-debian --task install_packages
 prepare-debian --task install_packages --task set_tools
 prepare-debian --all --force
@@ -54,6 +55,7 @@ Tasks run in alphabetical order during `--all`:
 
 | Task | Effect | Main requirements |
 | --- | --- | --- |
+| `configure_agents` | Updates the user Codex and Claude config files while preserving unrelated values. It disables commit/PR attribution and Claude session links. | Write access to `~/.codex` and `~/.claude` |
 | `install_packages` | Updates apt metadata and installs the packages listed in `prepare_debian/tasks/install_packages.py`. | `sudo`, apt, network access |
 | `prepare_impacket` | Ensures `python3-impacket` is installed and appends its examples directory to `.profile`, `.bashrc`, and `.zshrc` under the current home directory, creating missing files. | `sudo` if installation is needed |
 | `set_bash_config` | Ensures Git and `xclip`, clones or updates `w0ot-net/bash_config`, and executes its `install.py`. | `sudo`, Git, network access; executes remote code |
@@ -64,6 +66,15 @@ Tools and `bash_config` are stored under `~/tools` for the user whose home direc
 Python resolves at runtime. Running the whole command through `sudo` may therefore
 target root's home rather than the invoking user's home. Run home-directory tasks as
 the intended user and the system-wide shell task separately when appropriate.
+
+### Agent configuration
+
+`configure_agents` manages explicit values in `~/.codex/config.toml` and
+`~/.claude/settings.json`. The desired values live in `CODEX_VALUES` and
+`CLAUDE_VALUES` in `prepare_debian/tasks/configure_agents.py`, so another supported
+setting can be added without replacing either config file. The initial policy disables
+Codex commit attribution and all Claude commit, pull-request, and session-link
+attribution. Invalid existing Claude JSON fails without overwriting that file.
 
 Existing Git checkouts follow their remote branch with `git pull --ff-only`, and the
 `bash_config` installer is executed from that mutable checkout. Inspect the configured
