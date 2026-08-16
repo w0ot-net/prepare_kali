@@ -1,10 +1,9 @@
-#!/usr/bin/env python3
 import os
 import subprocess
 from pathlib import Path
 import pwd
 
-from utils import output_utils
+from prepare_debian.utils import output_utils
 
 
 def run(cmd):
@@ -91,7 +90,3 @@ def ensure_default_shell_bash(force=False):
 
 def main(force=False):
     ensure_default_shell_bash(force=force)
-
-
-if __name__ == "__main__":
-    main()

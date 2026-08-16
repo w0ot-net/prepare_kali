@@ -1,9 +1,8 @@
-#!/usr/bin/env python3
 import subprocess
 
-from utils import apt_utils
-from utils import output_utils
-from tasks import set_tools
+from prepare_debian.tasks import set_tools
+from prepare_debian.utils import apt_utils
+from prepare_debian.utils import output_utils
 
 
 BASH_CONFIG_URL = "https://github.com/w0ot-net/bash_config"
@@ -41,7 +40,3 @@ def main(force=False):
         return
     if ensure_bash_config_repo(force=force):
         run_install()
-
-
-if __name__ == "__main__":
-    main()

@@ -1,13 +1,12 @@
-#!/usr/bin/env python3
 import argparse
 import sys
 
-from tasks import prepare_impacket
-from tasks import set_bash_config
-from tasks import install_packages
-from tasks import set_shell_to_bash
-from tasks import set_tools
-from utils import output_utils
+from prepare_debian.tasks import install_packages
+from prepare_debian.tasks import prepare_impacket
+from prepare_debian.tasks import set_bash_config
+from prepare_debian.tasks import set_shell_to_bash
+from prepare_debian.tasks import set_tools
+from prepare_debian.utils import output_utils
 
 
 TASKS = {
@@ -65,7 +64,3 @@ def main():
             return 1
     output_utils.info('Run: source ~/.bashrc')
     return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

@@ -1,9 +1,8 @@
-#!/usr/bin/env python3
 import shutil
 import subprocess
 import sys
 
-from utils import output_utils
+from prepare_debian.utils import output_utils
 
 
 def run(cmd):

@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "prepare-debian"
+version = "0.1.0"
+description = "Prepare a Debian-based workstation with common packages and tools."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+prepare-debian = "prepare_debian.cli:main"
+
+[project.urls]
+Repository = "https://github.com/w0ot-net/prepare_kali"
+
+[tool.setuptools.packages.find]
+include = ["prepare_debian*"]

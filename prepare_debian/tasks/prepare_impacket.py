@@ -1,9 +1,8 @@
-#!/usr/bin/env python3
 import sys
 from pathlib import Path
 
-from utils import apt_utils
-from utils import output_utils
+from prepare_debian.utils import apt_utils
+from prepare_debian.utils import output_utils
 
 IMPACKET_EXAMPLES = "/usr/lib/python3/dist-packages/impacket/examples/"
 PROFILE_FILES = [".profile", ".bashrc", ".zshrc"]
@@ -52,7 +51,3 @@ def main(force=False):
     if not apt_utils.ensure_apt_package("python3-impacket", force=force):
         output_utils.warn("python3-impacket installation not confirmed.")
     ensure_path_in_profile(force=force)
-
-
-if __name__ == "__main__":
-    main()

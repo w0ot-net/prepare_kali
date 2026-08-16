@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-from utils import apt_utils
+from prepare_debian.utils import apt_utils
 
 
 PACKAGES = [
@@ -18,7 +17,3 @@ def main(force=False):
         if not apt_utils.ensure_apt_package(package, force=force):
             return False
     return True
-
-
-if __name__ == "__main__":
-    main()

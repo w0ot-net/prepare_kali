@@ -1,8 +1,7 @@
-#!/usr/bin/env python3
 import subprocess
 from pathlib import Path
 
-from utils import output_utils
+from prepare_debian.utils import output_utils
 
 
 TOOLS_DIR = Path.home() / "tools"
@@ -65,7 +64,3 @@ def main(force=False):
         return
     for url in REPOS:
         ensure_repo(url, force=force)
-
-
-if __name__ == "__main__":
-    main()
