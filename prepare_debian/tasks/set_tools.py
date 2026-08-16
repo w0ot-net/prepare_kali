@@ -1,9 +1,6 @@
-import subprocess
-from collections.abc import Sequence
 from pathlib import Path
-from typing import Optional
 
-from prepare_debian.utils import output_utils
+from prepare_debian.utils import output_utils, process_utils
 
 TOOLS_DIR = Path.home() / "tools"
 REPOS: list[str] = [
@@ -16,18 +13,6 @@ REPOS: list[str] = [
     "https://github.com/w0ot-net/service_organizer",
     "https://github.com/w0ot-net/ad_account_unlocker",
 ]
-
-
-def run(
-    cmd: Sequence[str], cwd: Optional[Path] = None
-) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        cmd,
-        check=False,
-        text=True,
-        capture_output=True,
-        cwd=cwd,
-    )
 
 
 def ensure_tools_dir() -> bool:
@@ -43,15 +28,16 @@ def repo_dir(url: str) -> Path:
     return TOOLS_DIR / url.rstrip("/").split("/")[-1]
 
 
-def ensure_repo(url: str, force: bool = False) -> bool:
+def ensure_repo(url: str) -> bool:
     path = repo_dir(url)
     if path.exists():
         git_dir = path / ".git"
         if git_dir.exists():
             output_utils.info(f"Updating {path}.")
-            result = run(["git", "-C", str(path), "pull", "--ff-only"])
-            if result.returncode != 0:
-                output_utils.warn(result.stderr.strip() or f"Failed to update {path}.")
+            result = process_utils.run(["git", "-C", str(path), "pull", "--ff-only"])
+            if result is None or result.returncode != 0:
+                stderr = result.stderr.strip() if result is not None else ""
+                output_utils.warn(stderr or f"Failed to update {path}.")
                 return False
             output_utils.ok(f"Updated {path}.")
             return True
@@ -60,16 +46,20 @@ def ensure_repo(url: str, force: bool = False) -> bool:
         return False
 
     output_utils.info(f"Cloning {url} into {path}.")
-    result = run(["git", "clone", url, str(path)])
-    if result.returncode != 0:
-        output_utils.warn(result.stderr.strip() or f"Failed to clone {url}.")
+    result = process_utils.run(["git", "clone", url, str(path)])
+    if result is None or result.returncode != 0:
+        stderr = result.stderr.strip() if result is not None else ""
+        output_utils.warn(stderr or f"Failed to clone {url}.")
         return False
     output_utils.ok(f"Cloned {url}.")
     return True
 
 
-def main(force: bool = False) -> None:
+def main() -> bool:
     if not ensure_tools_dir():
-        return
+        return False
+    success = True
     for url in REPOS:
-        ensure_repo(url, force=force)
+        if not ensure_repo(url):
+            success = False
+    return success

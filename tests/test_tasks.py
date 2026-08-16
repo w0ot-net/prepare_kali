@@ -1,0 +1,78 @@
+from unittest import mock
+
+from prepare_debian.tasks import (
+    install_packages,
+    prepare_impacket,
+    set_bash_config,
+    set_shell_to_bash,
+    set_tools,
+)
+
+
+def test_install_packages_stops_when_cache_update_fails() -> None:
+    with (
+        mock.patch.object(
+            install_packages.apt_utils, "update_apt_cache", return_value=False
+        ),
+        mock.patch.object(install_packages.apt_utils, "ensure_apt_package") as install,
+    ):
+        assert install_packages.main() is False
+
+    install.assert_not_called()
+
+
+def test_prepare_impacket_stops_when_package_install_fails() -> None:
+    with (
+        mock.patch.object(
+            prepare_impacket.apt_utils, "ensure_apt_package", return_value=False
+        ),
+        mock.patch.object(prepare_impacket, "ensure_path_in_profile") as configure,
+    ):
+        assert prepare_impacket.main() is False
+
+    configure.assert_not_called()
+
+
+def test_set_tools_aggregates_repository_failures() -> None:
+    with (
+        mock.patch.object(set_tools, "ensure_tools_dir", return_value=True),
+        mock.patch.object(set_tools, "REPOS", ["one", "two"]),
+        mock.patch.object(
+            set_tools, "ensure_repo", side_effect=[False, True]
+        ) as ensure,
+    ):
+        assert set_tools.main() is False
+
+    assert ensure.call_count == 2
+
+
+def test_bash_config_stops_before_installer_on_repository_failure() -> None:
+    with (
+        mock.patch.object(
+            set_bash_config.apt_utils, "update_apt_cache", return_value=True
+        ),
+        mock.patch.object(
+            set_bash_config.apt_utils, "ensure_apt_package", return_value=True
+        ),
+        mock.patch.object(
+            set_bash_config.set_tools, "ensure_tools_dir", return_value=True
+        ),
+        mock.patch.object(
+            set_bash_config, "ensure_bash_config_repo", return_value=False
+        ),
+        mock.patch.object(set_bash_config, "run_install") as install,
+    ):
+        assert set_bash_config.main() is False
+
+    install.assert_not_called()
+
+
+def test_shell_task_reports_missing_root_privileges() -> None:
+    with (
+        mock.patch.object(set_shell_to_bash.os.path, "exists", return_value=True),
+        mock.patch.object(set_shell_to_bash.os, "geteuid", return_value=1000),
+        mock.patch.object(set_shell_to_bash.process_utils, "run") as run,
+    ):
+        assert set_shell_to_bash.main() is False
+
+    run.assert_not_called()

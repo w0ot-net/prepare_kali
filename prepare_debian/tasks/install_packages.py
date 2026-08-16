@@ -10,9 +10,10 @@ PACKAGES: list[str] = [
 ]
 
 
-def main(force: bool = False) -> bool:
-    apt_utils.update_apt_cache()
+def main() -> bool:
+    if not apt_utils.update_apt_cache():
+        return False
     for package in PACKAGES:
-        if not apt_utils.ensure_apt_package(package, force=force):
+        if not apt_utils.ensure_apt_package(package):
             return False
     return True

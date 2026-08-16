@@ -11,7 +11,7 @@ from prepare_debian.tasks import (
 )
 from prepare_debian.utils import output_utils
 
-TASKS: dict[str, Callable[..., object]] = {
+TASKS: dict[str, Callable[[], bool]] = {
     "configure_agents": configure_agents.main,
     "prepare_impacket": prepare_impacket.main,
     "set_bash_config": set_bash_config.main,
@@ -23,37 +23,29 @@ TASKS: dict[str, Callable[..., object]] = {
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Prepare Debian-based tasks runner.")
-    parser.add_argument(
+    selection = parser.add_mutually_exclusive_group(required=True)
+    selection.add_argument(
         "--all",
         action="store_true",
         help="Run all tasks.",
     )
-    parser.add_argument(
+    selection.add_argument(
         "--task",
         action="append",
         default=[],
         choices=sorted(TASKS.keys()),
         help="Run a specific task by name. Can be provided multiple times.",
     )
-    parser.add_argument(
-        "--force",
-        action="store_true",
-        help="Force tasks to re-apply changes even if already configured.",
-    )
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
-    if not args.all and not args.task:
-        args.all = True
-
     if args.all:
         output_utils.banner("== prepare_debian :: run all ==")
         for name in sorted(TASKS.keys()):
             output_utils.info(f"Running task: {name}")
-            result = TASKS[name](force=args.force)
-            if result is False:
+            if not TASKS[name]():
                 output_utils.warn(f"Task failed: {name}")
                 return 1
         output_utils.info("Run: source ~/.bashrc")
@@ -61,8 +53,7 @@ def main() -> int:
 
     for name in args.task:
         output_utils.banner(f"== prepare_debian :: {name} ==")
-        result = TASKS[name](force=args.force)
-        if result is False:
+        if not TASKS[name]():
             output_utils.warn(f"Task failed: {name}")
             return 1
     output_utils.info("Run: source ~/.bashrc")

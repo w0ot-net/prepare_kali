@@ -33,24 +33,60 @@ def test_help_does_not_run_tasks(monkeypatch: pytest.MonkeyPatch) -> None:
     task.assert_not_called()
 
 
-def test_no_arguments_runs_all_tasks_in_sorted_order(
+def test_no_arguments_exits_without_running_tasks(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    task = mock.Mock(return_value=True)
+    monkeypatch.setattr(cli, "TASKS", {"safe": task})
+    monkeypatch.setattr(sys, "argv", ["prepare-debian"])
+
+    with pytest.raises(SystemExit) as exc_info:
+        cli.main()
+
+    assert exc_info.value.code == 2
+    task.assert_not_called()
+
+
+def test_all_runs_tasks_in_sorted_order(monkeypatch: pytest.MonkeyPatch) -> None:
     calls: list[str] = []
 
-    def task(name: str) -> Callable[..., bool]:
-        def run(*, force: bool = False) -> bool:
-            assert force is False
+    def task(name: str) -> Callable[[], bool]:
+        def run() -> bool:
             calls.append(name)
             return True
 
         return run
 
     monkeypatch.setattr(cli, "TASKS", {name: task(name) for name in ("zeta", "alpha")})
-    monkeypatch.setattr(sys, "argv", ["prepare-debian"])
+    monkeypatch.setattr(sys, "argv", ["prepare-debian", "--all"])
 
     assert cli.main() == 0
     assert calls == ["alpha", "zeta"]
+
+
+def test_conflicting_selection_exits_without_running_tasks(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    task = mock.Mock(return_value=True)
+    monkeypatch.setattr(cli, "TASKS", {"safe": task})
+    monkeypatch.setattr(sys, "argv", ["prepare-debian", "--all", "--task", "safe"])
+
+    with pytest.raises(SystemExit) as exc_info:
+        cli.main()
+
+    assert exc_info.value.code == 2
+    task.assert_not_called()
+
+
+def test_runner_stops_after_failed_task(monkeypatch: pytest.MonkeyPatch) -> None:
+    first = mock.Mock(return_value=False)
+    second = mock.Mock(return_value=True)
+    monkeypatch.setattr(cli, "TASKS", {"first": first, "second": second})
+    monkeypatch.setattr(sys, "argv", ["prepare-debian", "--all"])
+
+    assert cli.main() == 1
+    first.assert_called_once_with()
+    second.assert_not_called()
 
 
 def test_module_entrypoint_delegates_to_cli() -> None:

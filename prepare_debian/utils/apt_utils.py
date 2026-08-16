@@ -1,58 +1,64 @@
+import os
 import shutil
-import subprocess
 import sys
-from collections.abc import Sequence
+from typing import Optional
 
-from prepare_debian.utils import output_utils
-
-
-def run(cmd: Sequence[str]) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        cmd,
-        check=False,
-        text=True,
-        capture_output=True,
-    )
+from prepare_debian.utils import output_utils, process_utils
 
 
-def is_package_installed(package: str) -> bool:
+def is_package_installed(package: str) -> Optional[bool]:
     if shutil.which("dpkg") is None:
         output_utils.warn("dpkg not found; cannot verify package installation.")
-        return False
-    check = run(["dpkg", "-s", package])
+        return None
+    check = process_utils.run(["dpkg", "-s", package])
+    if check is None:
+        return None
     return check.returncode == 0
 
 
+def apt_command(arguments: list[str]) -> Optional[list[str]]:
+    if shutil.which("apt-get") is None:
+        output_utils.warn("apt-get not found; cannot manage packages.")
+        return None
+    if os.geteuid() == 0:
+        return ["apt-get", *arguments]
+    if shutil.which("sudo") is None:
+        output_utils.warn("sudo not found; cannot manage packages as a non-root user.")
+        return None
+    return ["sudo", "apt-get", *arguments]
+
+
 def update_apt_cache() -> bool:
-    if shutil.which("sudo") is None or shutil.which("apt-get") is None:
-        output_utils.warn("sudo or apt-get not found; cannot update package cache.")
+    command = apt_command(["update"])
+    if command is None:
         return False
-    result = run(["sudo", "apt-get", "update"])
-    if result.returncode != 0:
+    result = process_utils.run(command)
+    if result is None or result.returncode != 0:
+        if result is None:
+            return False
         sys.stderr.write(result.stderr)
         return False
     return True
 
 
-def ensure_apt_package(package: str, force: bool = False) -> bool:
+def ensure_apt_package(package: str) -> bool:
     installed = is_package_installed(package)
-    if installed and not force:
+    if installed is None:
+        return False
+    if installed:
         output_utils.ok(f"{package} already installed; skipping.")
         return True
 
-    if installed and force:
-        output_utils.info(
-            f"{package} already installed; reinstalling because --force was set."
-        )
-    else:
-        output_utils.info(f"{package} not installed; attempting to install via apt.")
+    output_utils.info(f"{package} not installed; attempting to install via apt.")
 
-    if shutil.which("sudo") is None or shutil.which("apt-get") is None:
-        output_utils.warn("sudo or apt-get not found; cannot install packages.")
+    command = apt_command(["install", "-y", package])
+    if command is None:
         return False
 
-    install = run(["sudo", "apt-get", "install", "-y", package])
-    if install.returncode != 0:
+    install = process_utils.run(command)
+    if install is None or install.returncode != 0:
+        if install is None:
+            return False
         sys.stderr.write(install.stderr)
         return False
 

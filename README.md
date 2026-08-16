@@ -8,7 +8,7 @@ Debian-derived systems such as Kali Linux, Ubuntu, and Debian.
 
 - Python 3.9 or newer.
 - A Debian-based system with `apt-get` and `dpkg`.
-- `sudo` for package operations, including when the command itself runs as root.
+- `sudo` for package operations when the command is not already running as root.
 - Network access for apt and Git operations.
 - Effective root privileges for the `set_shell_to_bash` task.
 
@@ -37,17 +37,18 @@ prepare-debian --all
 prepare-debian --task configure_agents
 prepare-debian --task install_packages
 prepare-debian --task install_packages --task set_tools
-prepare-debian --all --force
+prepare-debian --all
 ```
 
-Important: running `prepare-debian` without arguments currently runs every task, the
-same as `--all`. An all-task run performs package installation, network operations,
-home-directory changes, remote installer execution, and system-wide shell changes.
-Review the task list and prefer explicit `--task` selections when you do not want all
-of those effects.
+An explicit `--all` or at least one `--task` selection is required. Running without a
+selection, or combining `--all` with `--task`, exits with argparse status 2 before any
+task runs. An all-task run performs package installation, network operations,
+home-directory changes, remote installer execution, and system-wide shell changes, so
+review the task list before selecting it.
 
-`--force` reinstalls already installed apt packages and reapplies some shell settings.
-Repository checkouts are updated whenever their task runs, regardless of `--force`.
+Tasks use their existing state checks for idempotence. The runner stops at the first
+failed selected task and returns status 1; it does not roll back earlier successful
+changes.
 
 ## Tasks
 
@@ -82,10 +83,10 @@ sources before running tasks that fetch or execute them.
 
 ## Exit status
 
-The command returns nonzero when the runner receives an explicit `False` result from
-a task. Some tasks currently warn about internal failures without returning `False`,
-so a zero exit status does not yet guarantee that every requested operation succeeded.
-Review the command output for warnings.
+The command returns 0 only when every selected task succeeds, 1 when a task fails, and
+2 for invalid or missing arguments. Missing external commands and expected operating
+system or filesystem failures are reported as concise task failures rather than
+uncaught subprocess errors.
 
 ## Project structure
 

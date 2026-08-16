@@ -40,8 +40,7 @@ def apply_agent_config(home: Path, codex_home: Optional[Path] = None) -> None:
         output_utils.ok(f"{action}: {name} attribution disabled in {path}")
 
 
-def main(force: bool = False) -> bool:
-    del force
+def main() -> bool:
     try:
         apply_agent_config(Path.home())
     except (config_utils.ConfigUpdateError, OSError) as exc:

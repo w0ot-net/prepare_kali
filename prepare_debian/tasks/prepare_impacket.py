@@ -10,11 +10,12 @@ def path_export_line() -> str:
     return f'export PATH="$PATH:{IMPACKET_EXAMPLES}"\n'
 
 
-def ensure_path_in_profile(force: bool = False) -> None:
+def ensure_path_in_profile() -> bool:
     home = Path.home()
     line = path_export_line()
     comment = "# Added by prepare_impacket.py\n"
     updated_any = False
+    success = True
 
     for filename in PROFILE_FILES:
         path = home / filename
@@ -22,11 +23,10 @@ def ensure_path_in_profile(force: bool = False) -> None:
             existing = path.read_text() if path.exists() else ""
         except OSError as exc:
             output_utils.warn(f"Could not read {path}: {exc}")
+            success = False
             continue
 
         if IMPACKET_EXAMPLES in existing:
-            if force:
-                output_utils.ok(f"PATH already includes impacket examples in {path}.")
             continue
 
         try:
@@ -38,16 +38,21 @@ def ensure_path_in_profile(force: bool = False) -> None:
             updated_any = True
         except OSError as exc:
             output_utils.warn(f"Could not write {path}: {exc}")
+            success = False
 
+    if not success:
+        return False
     if not updated_any:
-        output_utils.ok("PATH already updated or no writable profile files found.")
+        output_utils.ok("PATH already includes the impacket examples directory.")
     else:
         output_utils.ok(
             "Updated shell profile(s). Restart your shell to pick up PATH changes."
         )
+    return True
 
 
-def main(force: bool = False) -> None:
-    if not apt_utils.ensure_apt_package("python3-impacket", force=force):
+def main() -> bool:
+    if not apt_utils.ensure_apt_package("python3-impacket"):
         output_utils.warn("python3-impacket installation not confirmed.")
-    ensure_path_in_profile(force=force)
+        return False
+    return ensure_path_in_profile()
