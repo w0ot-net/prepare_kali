@@ -2,6 +2,7 @@ from prepare_debian.utils import apt_utils
 
 PACKAGES: list[str] = [
     "git",
+    "proxychains4",
     "python3-impacket",
     "python3-paramiko",
     "python3-psycopg2",
