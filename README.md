@@ -55,7 +55,7 @@ Available tasks:
 | Task | Effect | Main requirements |
 | --- | --- | --- |
 | `configure_agents` | Disables Codex/Claude attribution, installs either CLI when missing, synchronizes the pinned coding-agent helpers, and links their skills for both CLIs. | Network access, Git, `sh`, `bash`, and write access to the user's config, `~/.local`, `~/.agents`, `~/.claude`, and `~/tools` paths |
-| `disable_screen_lock` | Disables automatic idle screen locking and display blanking for the invoking user's active GNOME or XFCE session while preserving manual locking. | Run as the intended user inside a GNOME or XFCE graphical session; `gsettings` or `xfconf-query` |
+| `disable_screen_lock` | Disables automatic idle screen locking and display blanking for the invoking user's active GNOME or XFCE session while preserving manual locking. | Run as the intended user inside a GNOME or XFCE graphical session; `gsettings`, or `xfconf-query` with XFCE's power-manager and screensaver commands |
 | `install_packages` | Updates apt metadata and installs the packages listed in `prepare_debian/tasks/install_packages.py`. | Package-management privileges, apt, network access |
 | `prepare_impacket` | Ensures `python3-impacket` is installed and appends its examples directory to `.profile`, `.bashrc`, and `.zshrc` under the current home directory, creating missing files. | Package-management privileges if installation is needed |
 | `set_bash_config` | Ensures Git and `xclip`, synchronizes `w0ot-net/bash_config` to its reviewed commit pin, and executes that revision's `install.py`. | Package-management privileges, Git, network access; executes externally maintained code |
@@ -72,8 +72,10 @@ the intended user and the system-wide shell task separately when appropriate.
 `disable_screen_lock` detects the active desktop from `XDG_CURRENT_DESKTOP`, falling
 back to `DESKTOP_SESSION`. On GNOME it disables the session idle timeout and automatic
 lock-on-screensaver setting. On XFCE it disables idle screensaver activation,
-lock-on-screensaver activation, and power-manager DPMS for both AC and battery use.
-Every value is read back before the task succeeds.
+lock-on-screensaver activation, lock-on-sleep in both the screensaver and power
+manager, and power-manager DPMS for both AC and battery use. Every value is read back,
+then the power manager is restarted and the running screensaver's idle timer is reset
+before the task succeeds.
 
 Run this task as the intended desktop user from a terminal within the graphical
 session. It intentionally weakens a physical-access security control: the desktop will

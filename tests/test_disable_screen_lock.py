@@ -66,6 +66,11 @@ def test_xfce_settings_are_written_and_verified() -> None:
     }
 
     def run(command: list[str]) -> subprocess.CompletedProcess[str]:
+        if command in (
+            ["xfce4-power-manager", "--restart"],
+            ["xfce4-screensaver-command", "--poke"],
+        ):
+            return result()
         channel = command[command.index("--channel") + 1]
         property_name = command[command.index("--property") + 1]
         if "--set" in command:
@@ -73,10 +78,14 @@ def test_xfce_settings_are_written_and_verified() -> None:
             return result()
         return result(state[(channel, property_name)])
 
-    with mock.patch.object(disable_screen_lock.process_utils, "run", side_effect=run):
+    with mock.patch.object(
+        disable_screen_lock.process_utils, "run", side_effect=run
+    ) as run_mock:
         assert disable_screen_lock.configure_xfce() is True
 
     assert all(value == "false" for value in state.values())
+    run_mock.assert_any_call(["xfce4-power-manager", "--restart"])
+    run_mock.assert_called_with(["xfce4-screensaver-command", "--poke"])
 
 
 def test_xfce_missing_property_is_created_as_boolean() -> None:
@@ -84,6 +93,7 @@ def test_xfce_missing_property_is_created_as_boolean() -> None:
     responses = []
     for _ in disable_screen_lock.XFCE_SETTINGS:
         responses.extend([result(returncode=1), result(), result("false")])
+    responses.extend([result(), result()])
 
     def run(command: list[str]) -> subprocess.CompletedProcess[str]:
         calls.append(command)
@@ -95,6 +105,17 @@ def test_xfce_missing_property_is_created_as_boolean() -> None:
     updates = [command for command in calls if "--set" in command]
     assert all("--create" in command for command in updates)
     assert all(command[command.index("--type") + 1] == "bool" for command in updates)
+
+
+def test_xfce_process_reset_failure_is_propagated() -> None:
+    responses = [
+        result("false") for _ in disable_screen_lock.XFCE_SETTINGS
+    ] + [result(returncode=1)]
+
+    with mock.patch.object(
+        disable_screen_lock.process_utils, "run", side_effect=responses
+    ):
+        assert disable_screen_lock.configure_xfce() is False
 
 
 def test_failed_setting_write_is_propagated() -> None:

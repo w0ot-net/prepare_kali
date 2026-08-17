@@ -13,7 +13,12 @@ GNOME_SETTINGS = (
 XFCE_SETTINGS = (
     ("xfce4-screensaver", "/saver/idle-activation/enabled"),
     ("xfce4-screensaver", "/lock/saver-activation/enabled"),
+    ("xfce4-screensaver", "/lock/sleep-activation"),
     ("xfce4-power-manager", "/xfce4-power-manager/dpms-enabled"),
+    (
+        "xfce4-power-manager",
+        "/xfce4-power-manager/lock-screen-suspend-hibernate",
+    ),
 )
 
 
@@ -101,6 +106,20 @@ def configure_xfce() -> bool:
             )
             return False
         output_utils.ok(f"Disabled XFCE idle behavior: {channel} {property_name}")
+
+    restarted = process_utils.run(["xfce4-power-manager", "--restart"])
+    if not _successful(restarted):
+        stderr = restarted.stderr.strip() if restarted is not None else ""
+        output_utils.warn(stderr or "Could not restart the XFCE power manager.")
+        return False
+    output_utils.ok("Restarted the XFCE power manager.")
+
+    reset = process_utils.run(["xfce4-screensaver-command", "--poke"])
+    if not _successful(reset):
+        stderr = reset.stderr.strip() if reset is not None else ""
+        output_utils.warn(stderr or "Could not reset the XFCE screensaver idle timer.")
+        return False
+    output_utils.ok("Reset the XFCE screensaver idle timer.")
     return True
 
 
