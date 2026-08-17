@@ -148,7 +148,7 @@ Install the development tools into the active environment:
 python -m pip install -e '.[dev]'
 ```
 
-Run the same quality checks used by CI:
+Run the project quality checks:
 
 ```sh
 python -m pytest -q
