@@ -34,18 +34,25 @@ def test_help_does_not_run_tasks(monkeypatch: pytest.MonkeyPatch) -> None:
     task.assert_not_called()
 
 
-def test_no_arguments_exits_without_running_tasks(
+def test_no_arguments_run_all_tasks_in_sorted_order(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    task = mock.Mock(return_value=True)
-    monkeypatch.setattr(cli, "TASKS", {"safe": task})
+    calls: list[str] = []
+
+    def task(name: str) -> Callable[[], bool]:
+        def run() -> bool:
+            calls.append(name)
+            return True
+
+        return run
+
+    monkeypatch.setattr(
+        cli, "TASKS", {name: task(name) for name in ("zeta", "alpha")}
+    )
     monkeypatch.setattr(sys, "argv", ["prepare-debian"])
 
-    with pytest.raises(SystemExit) as exc_info:
-        cli.main()
-
-    assert exc_info.value.code == 2
-    task.assert_not_called()
+    assert cli.main() == 0
+    assert calls == ["alpha", "zeta"]
 
 
 def test_repeated_tasks_run_in_supplied_order(monkeypatch: pytest.MonkeyPatch) -> None:

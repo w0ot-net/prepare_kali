@@ -28,16 +28,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--task",
         action="append",
-        required=True,
         choices=sorted(TASKS.keys()),
-        help="Run a specific task by name. Can be provided multiple times.",
+        help="Run a specific task by name. Repeat to run several; omit to run all.",
     )
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
-    for name in args.task:
+    selected_tasks = args.task or sorted(TASKS)
+    for name in selected_tasks:
         output_utils.banner(f"== prepare_debian :: {name} ==")
         if not TASKS[name]():
             output_utils.warn(f"Task failed: {name}")

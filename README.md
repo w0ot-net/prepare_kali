@@ -32,6 +32,8 @@ Task modules are internal and are not supported as standalone scripts.
 ## Usage
 
 ```sh
+python3 main.py
+./main.py
 prepare-debian --help
 prepare-debian --task disable_screen_lock
 prepare-debian --task configure_agents
@@ -39,11 +41,12 @@ prepare-debian --task install_packages
 prepare-debian --task install_packages --task set_tools
 ```
 
-At least one `--task` selection is required. Repeat `--task` to run several tasks in the
-supplied order. Running without a selection exits with argparse status 2 before any task
-runs. Tasks use their existing state checks for idempotence. The runner stops at the
-first failed selected task and returns status 1; it does not roll back earlier
-successful changes.
+Running `python3 main.py`, `./main.py`, `python3 -m prepare_debian`, or the installed
+`prepare-debian` command without options runs every task in alphabetical order. Use
+`--task` to run only a specific task; repeat it to run several tasks in the supplied
+order. Tasks use their existing state checks for idempotence. The runner stops at the
+first failed task and returns status 1; it does not roll back earlier successful
+changes.
 
 ## Tasks
 
