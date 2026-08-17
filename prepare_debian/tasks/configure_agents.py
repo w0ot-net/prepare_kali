@@ -25,6 +25,11 @@ CLAUDE_VALUES: Mapping[str, Any] = {
     "includeCoAuthoredBy": False,
 }
 
+DOWNLOAD_USER_AGENT = (
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+)
+
 
 @dataclass(frozen=True)
 class CliSpec:
@@ -83,9 +88,13 @@ def locate_cli(command: str, home: Path) -> Optional[Path]:
 
 def run_installer(spec: CliSpec) -> bool:
     output_utils.info(f"Downloading the official {spec.name} installer.")
+    request = urllib.request.Request(
+        spec.installer_url,
+        headers={"User-Agent": DOWNLOAD_USER_AGENT},
+    )
     try:
         with (
-            urllib.request.urlopen(spec.installer_url, timeout=30) as response,
+            urllib.request.urlopen(request, timeout=30) as response,
             tempfile.NamedTemporaryFile("wb") as installer,
         ):
             shutil.copyfileobj(response, installer)

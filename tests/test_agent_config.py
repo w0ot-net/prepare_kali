@@ -123,8 +123,11 @@ def test_installer_download_failure_is_propagated() -> None:
         configure_agents.urllib.request,
         "urlopen",
         side_effect=urllib.error.URLError("offline"),
-    ):
+    ) as urlopen:
         assert configure_agents.run_installer(configure_agents.CLI_SPECS[0]) is False
+
+    request = urlopen.call_args.args[0]
+    assert request.get_header("User-agent") == configure_agents.DOWNLOAD_USER_AGENT
 
 
 def test_cli_version_failure_is_propagated(tmp_path: Path) -> None:
