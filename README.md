@@ -33,27 +33,21 @@ Task modules are internal and are not supported as standalone scripts.
 
 ```sh
 prepare-debian --help
-prepare-debian --all
 prepare-debian --task disable_screen_lock
 prepare-debian --task configure_agents
 prepare-debian --task install_packages
 prepare-debian --task install_packages --task set_tools
-prepare-debian --all
 ```
 
-An explicit `--all` or at least one `--task` selection is required. Running without a
-selection, or combining `--all` with `--task`, exits with argparse status 2 before any
-task runs. An all-task run performs package installation, network operations,
-home-directory changes, remote installer execution, and system-wide shell changes, so
-review the task list before selecting it.
-
-Tasks use their existing state checks for idempotence. The runner stops at the first
-failed selected task and returns status 1; it does not roll back earlier successful
-changes.
+At least one `--task` selection is required. Repeat `--task` to run several tasks in the
+supplied order. Running without a selection exits with argparse status 2 before any task
+runs. Tasks use their existing state checks for idempotence. The runner stops at the
+first failed selected task and returns status 1; it does not roll back earlier
+successful changes.
 
 ## Tasks
 
-Tasks run in alphabetical order during `--all`:
+Available tasks:
 
 | Task | Effect | Main requirements |
 | --- | --- | --- |

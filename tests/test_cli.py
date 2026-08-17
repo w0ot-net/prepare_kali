@@ -48,7 +48,7 @@ def test_no_arguments_exits_without_running_tasks(
     task.assert_not_called()
 
 
-def test_all_runs_tasks_in_sorted_order(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_repeated_tasks_run_in_supplied_order(monkeypatch: pytest.MonkeyPatch) -> None:
     calls: list[str] = []
 
     def task(name: str) -> Callable[[], bool]:
@@ -59,18 +59,22 @@ def test_all_runs_tasks_in_sorted_order(monkeypatch: pytest.MonkeyPatch) -> None
         return run
 
     monkeypatch.setattr(cli, "TASKS", {name: task(name) for name in ("zeta", "alpha")})
-    monkeypatch.setattr(sys, "argv", ["prepare-debian", "--all"])
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["prepare-debian", "--task", "zeta", "--task", "alpha"],
+    )
 
     assert cli.main() == 0
-    assert calls == ["alpha", "zeta"]
+    assert calls == ["zeta", "alpha"]
 
 
-def test_conflicting_selection_exits_without_running_tasks(
+def test_removed_all_option_exits_without_running_tasks(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     task = mock.Mock(return_value=True)
     monkeypatch.setattr(cli, "TASKS", {"safe": task})
-    monkeypatch.setattr(sys, "argv", ["prepare-debian", "--all", "--task", "safe"])
+    monkeypatch.setattr(sys, "argv", ["prepare-debian", "--all"])
 
     with pytest.raises(SystemExit) as exc_info:
         cli.main()
@@ -83,7 +87,11 @@ def test_runner_stops_after_failed_task(monkeypatch: pytest.MonkeyPatch) -> None
     first = mock.Mock(return_value=False)
     second = mock.Mock(return_value=True)
     monkeypatch.setattr(cli, "TASKS", {"first": first, "second": second})
-    monkeypatch.setattr(sys, "argv", ["prepare-debian", "--all"])
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["prepare-debian", "--task", "first", "--task", "second"],
+    )
 
     assert cli.main() == 1
     first.assert_called_once_with()
