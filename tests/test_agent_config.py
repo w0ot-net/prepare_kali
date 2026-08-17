@@ -1,3 +1,4 @@
+import io
 import json
 import subprocess
 import tempfile
@@ -128,6 +129,26 @@ def test_installer_download_failure_is_propagated() -> None:
 
     request = urlopen.call_args.args[0]
     assert request.get_header("User-agent") == configure_agents.DOWNLOAD_USER_AGENT
+
+
+def test_installers_run_with_automation_environment() -> None:
+    for spec in configure_agents.CLI_SPECS:
+        with (
+            mock.patch.object(
+                configure_agents.urllib.request,
+                "urlopen",
+                return_value=io.BytesIO(b"#!/bin/sh\n"),
+            ),
+            mock.patch.object(
+                configure_agents.process_utils,
+                "run",
+                return_value=completed(spec.command),
+            ) as run,
+        ):
+            assert configure_agents.run_installer(spec) is True
+
+        command = run.call_args.args[0]
+        assert command[:3] == ["env", spec.installer_environment, spec.interpreter]
 
 
 def test_cli_version_failure_is_propagated(tmp_path: Path) -> None:

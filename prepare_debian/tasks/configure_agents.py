@@ -37,6 +37,7 @@ class CliSpec:
     command: str
     installer_url: str
     interpreter: str
+    installer_environment: str
 
 
 CLI_SPECS = (
@@ -45,12 +46,14 @@ CLI_SPECS = (
         "codex",
         "https://chatgpt.com/codex/install.sh",
         "sh",
+        "CODEX_NON_INTERACTIVE=1",
     ),
     CliSpec(
         "Claude",
         "claude",
         "https://claude.ai/install.sh",
         "bash",
+        "CLAUDE_INSTALL_ALLOW_SUDO=1",
     ),
 )
 
@@ -99,7 +102,9 @@ def run_installer(spec: CliSpec) -> bool:
         ):
             shutil.copyfileobj(response, installer)
             installer.flush()
-            result = process_utils.run([spec.interpreter, installer.name])
+            result = process_utils.run(
+                ["env", spec.installer_environment, spec.interpreter, installer.name]
+            )
     except (OSError, urllib.error.URLError) as exc:
         output_utils.warn(f"Could not download the {spec.name} installer: {exc}")
         return False
