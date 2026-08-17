@@ -99,10 +99,10 @@ missing, downloads and executes that vendor's current official standalone instal
 
 These installer URLs execute current external code and are not version-pinned by this
 project. After installation the task locates the command on `PATH` or under
-`~/.local/bin` and verifies `--version`. Reload the shell if `~/.local/bin` was newly
-added to `PATH`. Installers run without prompts; a root invocation explicitly permits
-Claude's root-scoped installation. Signing in, choosing an account, and configuring API
-credentials remain manual steps.
+`~/.local/bin` and verifies `--version`. The task adds `~/.local/bin` to `.profile`,
+`.bashrc`, and `.zshrc`; start a new shell after the first run. Installers run without
+prompts, and a root invocation explicitly permits Claude's root-scoped installation.
+Signing in, choosing an account, and configuring API credentials remain manual steps.
 
 The `coding_agent_helpers` repository is synchronized under
 `~/tools/coding_agent_helpers` at the reviewed commit in

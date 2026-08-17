@@ -29,6 +29,8 @@ DOWNLOAD_USER_AGENT = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
 )
+PROFILE_FILES = (".profile", ".bashrc", ".zshrc")
+LOCAL_BIN_EXPORT = 'export PATH="$HOME/.local/bin:$PATH"\n'
 
 
 @dataclass(frozen=True)
@@ -87,6 +89,30 @@ def locate_cli(command: str, home: Path) -> Optional[Path]:
     if local_command.is_file() and os.access(local_command, os.X_OK):
         return local_command
     return None
+
+
+def ensure_local_bin_on_path(home: Path) -> bool:
+    updated = False
+    for filename in PROFILE_FILES:
+        path = home / filename
+        try:
+            content = path.read_text(encoding="utf-8") if path.exists() else ""
+            if LOCAL_BIN_EXPORT.strip() in content:
+                continue
+            with path.open("a", encoding="utf-8") as profile:
+                if content and not content.endswith("\n"):
+                    profile.write("\n")
+                profile.write(LOCAL_BIN_EXPORT)
+            updated = True
+        except OSError as exc:
+            output_utils.warn(f"Could not update {path}: {exc}")
+            return False
+
+    if updated:
+        output_utils.ok("Added ~/.local/bin to shell PATH configuration.")
+    else:
+        output_utils.ok("~/.local/bin already configured in shell PATH.")
+    return True
 
 
 def run_installer(spec: CliSpec) -> bool:
@@ -208,6 +234,9 @@ def main() -> bool:
         apply_agent_config(home)
     except (config_utils.ConfigUpdateError, OSError) as exc:
         output_utils.warn(str(exc))
+        return False
+
+    if not ensure_local_bin_on_path(home):
         return False
 
     for spec in CLI_SPECS:
