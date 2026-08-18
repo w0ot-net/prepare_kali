@@ -66,7 +66,7 @@ def test_xfce_settings_are_written_and_verified() -> None:
     }
 
     def run(command: list[str]) -> subprocess.CompletedProcess[str]:
-        if command == ["xfce4-screensaver-command", "--deactivate", "--poke"]:
+        if command[0] == "xfce4-screensaver-command":
             return result()
         channel = command[command.index("--channel") + 1]
         property_name = command[command.index("--property") + 1]
@@ -81,6 +81,7 @@ def test_xfce_settings_are_written_and_verified() -> None:
         assert disable_screen_lock.configure_xfce() is True
 
     assert all(value == "false" for value in state.values())
+    run_mock.assert_any_call(["xfce4-screensaver-command", "--query"])
     run_mock.assert_called_with(
         ["xfce4-screensaver-command", "--deactivate", "--poke"]
     )
@@ -91,7 +92,7 @@ def test_xfce_missing_property_is_created_as_boolean() -> None:
     responses = []
     for _ in disable_screen_lock.XFCE_SETTINGS:
         responses.extend([result(returncode=1), result(), result("false")])
-    responses.append(result())
+    responses.extend([result(), result()])
 
     def run(command: list[str]) -> subprocess.CompletedProcess[str]:
         calls.append(command)
@@ -108,12 +109,25 @@ def test_xfce_missing_property_is_created_as_boolean() -> None:
 def test_xfce_process_reset_failure_is_propagated() -> None:
     responses = [
         result("false") for _ in disable_screen_lock.XFCE_SETTINGS
-    ] + [result(returncode=1)]
+    ] + [result(), result(returncode=1)]
 
     with mock.patch.object(
         disable_screen_lock.process_utils, "run", side_effect=responses
     ):
         assert disable_screen_lock.configure_xfce() is False
+
+
+def test_xfce_without_running_screensaver_needs_no_reset() -> None:
+    responses = [
+        result("false") for _ in disable_screen_lock.XFCE_SETTINGS
+    ] + [result(returncode=1)]
+
+    with mock.patch.object(
+        disable_screen_lock.process_utils, "run", side_effect=responses
+    ) as run:
+        assert disable_screen_lock.configure_xfce() is True
+
+    run.assert_called_with(["xfce4-screensaver-command", "--query"])
 
 
 def test_failed_setting_write_is_propagated() -> None:

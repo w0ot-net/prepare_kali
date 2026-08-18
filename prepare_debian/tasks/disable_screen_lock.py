@@ -109,9 +109,12 @@ def configure_xfce() -> bool:
             return False
         output_utils.ok(f"Disabled XFCE idle behavior: {channel} {property_name}")
 
-    reset = process_utils.run(
-        ["xfce4-screensaver-command", "--deactivate", "--poke"]
-    )
+    status = process_utils.run(["xfce4-screensaver-command", "--query"])
+    if not _successful(status):
+        output_utils.ok("XFCE screensaver is not running; no reset needed.")
+        return True
+
+    reset = process_utils.run(["xfce4-screensaver-command", "--deactivate", "--poke"])
     if not _successful(reset):
         stderr = reset.stderr.strip() if reset is not None else ""
         output_utils.warn(stderr or "Could not reset the XFCE screensaver state.")
