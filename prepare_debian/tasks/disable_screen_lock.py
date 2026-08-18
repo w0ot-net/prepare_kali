@@ -13,6 +13,7 @@ GNOME_SETTINGS = (
 XFCE_SETTINGS = (
     ("xfce4-screensaver", "/saver/enabled"),
     ("xfce4-screensaver", "/saver/idle-activation/enabled"),
+    ("xfce4-screensaver", "/lock/enabled"),
     ("xfce4-screensaver", "/lock/saver-activation/enabled"),
     ("xfce4-screensaver", "/lock/sleep-activation"),
     ("xfce4-power-manager", "/xfce4-power-manager/dpms-enabled"),
@@ -21,6 +22,12 @@ XFCE_SETTINGS = (
         "/xfce4-power-manager/lock-screen-suspend-hibernate",
     ),
     ("xfce4-session", "/shutdown/LockScreen"),
+)
+
+XFCE_X11_COMMANDS = (
+    ("xset", "s", "off"),
+    ("xset", "s", "noblank"),
+    ("xset", "-dpms"),
 )
 
 
@@ -108,6 +115,14 @@ def configure_xfce() -> bool:
             )
             return False
         output_utils.ok(f"Disabled XFCE idle behavior: {channel} {property_name}")
+
+    for command in XFCE_X11_COMMANDS:
+        updated = process_utils.run(command)
+        if not _successful(updated):
+            stderr = updated.stderr.strip() if updated is not None else ""
+            output_utils.warn(stderr or f"Could not run {' '.join(command)}.")
+            return False
+    output_utils.ok("Disabled the active X11 screensaver and DPMS timers.")
 
     status = process_utils.run(["xfce4-screensaver-command", "--query"])
     if not _successful(status):
