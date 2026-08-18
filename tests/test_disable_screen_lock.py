@@ -66,10 +66,7 @@ def test_xfce_settings_are_written_and_verified() -> None:
     }
 
     def run(command: list[str]) -> subprocess.CompletedProcess[str]:
-        if command in (
-            ["xfce4-power-manager", "--restart"],
-            ["xfce4-screensaver-command", "--poke"],
-        ):
+        if command == ["xfce4-screensaver-command", "--deactivate", "--poke"]:
             return result()
         channel = command[command.index("--channel") + 1]
         property_name = command[command.index("--property") + 1]
@@ -84,8 +81,9 @@ def test_xfce_settings_are_written_and_verified() -> None:
         assert disable_screen_lock.configure_xfce() is True
 
     assert all(value == "false" for value in state.values())
-    run_mock.assert_any_call(["xfce4-power-manager", "--restart"])
-    run_mock.assert_called_with(["xfce4-screensaver-command", "--poke"])
+    run_mock.assert_called_with(
+        ["xfce4-screensaver-command", "--deactivate", "--poke"]
+    )
 
 
 def test_xfce_missing_property_is_created_as_boolean() -> None:
@@ -93,7 +91,7 @@ def test_xfce_missing_property_is_created_as_boolean() -> None:
     responses = []
     for _ in disable_screen_lock.XFCE_SETTINGS:
         responses.extend([result(returncode=1), result(), result("false")])
-    responses.extend([result(), result()])
+    responses.append(result())
 
     def run(command: list[str]) -> subprocess.CompletedProcess[str]:
         calls.append(command)
