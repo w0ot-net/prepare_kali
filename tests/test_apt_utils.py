@@ -35,6 +35,17 @@ def test_update_propagates_nonzero_result() -> None:
         assert apt_utils.update_apt_cache() is False
 
 
+def test_package_availability_uses_apt_cache() -> None:
+    result = subprocess.CompletedProcess(["apt-cache"], 0, "Package: responder", "")
+    with (
+        mock.patch("shutil.which", return_value="/usr/bin/apt-cache"),
+        mock.patch.object(apt_utils.process_utils, "run", return_value=result) as run,
+    ):
+        assert apt_utils.is_package_available("responder") is True
+
+    run.assert_called_once_with(["apt-cache", "show", "responder"])
+
+
 def test_installed_package_skips_install() -> None:
     with (
         mock.patch.object(apt_utils, "is_package_installed", return_value=True),

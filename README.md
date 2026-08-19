@@ -38,6 +38,7 @@ prepare-debian --help
 prepare-debian --task disable_screen_lock
 prepare-debian --task configure_agents
 prepare-debian --task install_packages
+prepare-debian --task prepare_responder
 prepare-debian --task install_packages --task set_tools
 ```
 
@@ -58,6 +59,7 @@ Available tasks:
 | `disable_screen_lock` | Disables idle screen locking and display blanking for the invoking user's active GNOME or XFCE session. | Run as the intended user inside a GNOME or XFCE graphical session; `gsettings`, or `xfconf-query` and `xset` |
 | `install_packages` | Updates apt metadata and installs the packages listed in `prepare_debian/tasks/install_packages.py`. | Package-management privileges, apt, network access |
 | `prepare_impacket` | Ensures `python3-impacket` is installed and appends its examples directory to `.profile`, `.bashrc`, and `.zshrc` under the current home directory, creating missing files. | Package-management privileges if installation is needed |
+| `prepare_responder` | Installs Responder when available from apt and generates complete server-on and server-off configuration profiles without changing the active configuration. | Package-management privileges if installation is needed; apt; `/etc/responder/Responder.conf` when installed |
 | `set_bash_config` | Ensures Git and `xclip`, synchronizes `w0ot-net/bash_config` to its reviewed commit pin, and executes that revision's `install.py`. | Package-management privileges, Git, network access; executes externally maintained code |
 | `set_shell_to_bash` | Changes Bash to the login shell for root and login-capable users with UID 1000 or greater, then updates `/etc/default/useradd` and `/etc/adduser.conf` when present. | Effective root privileges, `chsh` |
 | `set_tools` | Creates `~/tools` and synchronizes configured `w0ot-net` repositories to reviewed commit pins. | Git and network access |
@@ -86,6 +88,25 @@ is disabled, so its manual lock command is unavailable too. The task does not al
 automatic suspend/hibernate, lid actions, brightness dimming, low-battery policy,
 display-manager login screens, or third-party lockers such as `xscreensaver` and
 `light-locker`.
+
+### Responder profiles
+
+`prepare_responder` checks whether the `responder` package is installed. When it is
+missing, the task installs it only if the configured apt repositories provide it;
+otherwise it reports a successful skip. It uses the packaged
+`/etc/responder/Responder.conf` as the source for these complete profiles:
+
+- `/etc/responder/Responder.conf.servers-on`
+- `/etc/responder/Responder.conf.servers-off`
+
+Only settings in the `Servers to start` block are changed. Poisoners and every other
+Responder setting retain their installed or locally configured values. The task does
+not replace the active configuration. For example, select the relay-oriented profile
+with:
+
+```sh
+cp /etc/responder/Responder.conf.servers-off /etc/responder/Responder.conf
+```
 
 ### Agent configuration
 

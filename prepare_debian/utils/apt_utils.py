@@ -16,6 +16,16 @@ def is_package_installed(package: str) -> Optional[bool]:
     return check.returncode == 0
 
 
+def is_package_available(package: str) -> Optional[bool]:
+    if shutil.which("apt-cache") is None:
+        output_utils.warn("apt-cache not found; cannot check package availability.")
+        return None
+    check = process_utils.run(["apt-cache", "show", package])
+    if check is None:
+        return None
+    return check.returncode == 0
+
+
 def apt_command(arguments: list[str]) -> Optional[list[str]]:
     if shutil.which("apt-get") is None:
         output_utils.warn("apt-get not found; cannot manage packages.")
