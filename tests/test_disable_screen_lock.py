@@ -86,9 +86,7 @@ def test_xfce_settings_are_written_and_verified() -> None:
     for command in disable_screen_lock.XFCE_X11_COMMANDS:
         run_mock.assert_any_call(command)
     run_mock.assert_any_call(["xfce4-screensaver-command", "--query"])
-    run_mock.assert_called_with(
-        ["xfce4-screensaver-command", "--deactivate", "--poke"]
-    )
+    run_mock.assert_called_with(["xfce4-screensaver-command", "--deactivate", "--poke"])
 
 
 def test_xfce_missing_property_is_created_as_boolean() -> None:
@@ -112,9 +110,7 @@ def test_xfce_missing_property_is_created_as_boolean() -> None:
 
 
 def test_xfce_process_reset_failure_is_propagated() -> None:
-    responses = [
-        result("false") for _ in disable_screen_lock.XFCE_SETTINGS
-    ]
+    responses = [result("false") for _ in disable_screen_lock.XFCE_SETTINGS]
     responses.extend(result() for _ in disable_screen_lock.XFCE_X11_COMMANDS)
     responses.extend([result(), result(returncode=1)])
 
@@ -125,9 +121,7 @@ def test_xfce_process_reset_failure_is_propagated() -> None:
 
 
 def test_xfce_without_running_screensaver_needs_no_reset() -> None:
-    responses = [
-        result("false") for _ in disable_screen_lock.XFCE_SETTINGS
-    ]
+    responses = [result("false") for _ in disable_screen_lock.XFCE_SETTINGS]
     responses.extend(result() for _ in disable_screen_lock.XFCE_X11_COMMANDS)
     responses.append(result(returncode=1))
 

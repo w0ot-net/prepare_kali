@@ -11,6 +11,8 @@ Debian-derived systems such as Kali Linux, Ubuntu, and Debian.
 - `sudo` for package operations when the command is not already running as root.
 - Network access for apt and Git operations.
 - Effective root privileges for the `set_shell_to_bash` task.
+- Effective root privileges for the `disable_virtualbox_drag_and_drop` task on a
+  VirtualBox guest.
 
 ## Installation
 
@@ -36,6 +38,7 @@ python3 main.py
 ./main.py
 prepare-debian --help
 prepare-debian --task disable_screen_lock
+prepare-debian --task disable_virtualbox_drag_and_drop
 prepare-debian --task configure_agents
 prepare-debian --task install_packages
 prepare-debian --task prepare_responder
@@ -57,6 +60,7 @@ Available tasks:
 | --- | --- | --- |
 | `configure_agents` | Disables Codex/Claude attribution, installs either CLI when missing, synchronizes the pinned coding-agent helpers, and links their skills for both CLIs. | Network access, Git, `sh`, `bash`, and write access to the user's config, `~/.local`, `~/.agents`, `~/.claude`, and `~/tools` paths |
 | `disable_screen_lock` | Disables idle screen locking and display blanking for the invoking user's active GNOME or XFCE session. | Run as the intended user inside a GNOME or XFCE graphical session; `gsettings`, or `xfconf-query` and `xset` |
+| `disable_virtualbox_drag_and_drop` | Persistently disables VirtualBox Guest Additions drag and drop and stops its active clients. | Effective root privileges on a VirtualBox guest; `systemd-detect-virt`, `pkill`, and the packaged Guest Additions X11 session launcher when installed |
 | `install_packages` | Updates apt metadata and installs the packages listed in `prepare_debian/tasks/install_packages.py`. | Package-management privileges, apt, network access |
 | `prepare_impacket` | Ensures `python3-impacket` is installed and appends its examples directory to `.profile`, `.bashrc`, and `.zshrc` under the current home directory, creating missing files. | Package-management privileges if installation is needed |
 | `prepare_responder` | Installs Responder when available from apt and generates complete server-on and server-off configuration profiles without changing the active configuration. | Package-management privileges if installation is needed; apt; `/etc/responder/Responder.conf` when installed |
@@ -88,6 +92,20 @@ is disabled, so its manual lock command is unavailable too. The task does not al
 automatic suspend/hibernate, lid actions, brightness dimming, low-battery policy,
 display-manager login screens, or third-party lockers such as `xscreensaver` and
 `light-locker`.
+
+### VirtualBox drag and drop
+
+`disable_virtualbox_drag_and_drop` uses `systemd-detect-virt --vm` and changes
+state only when the reported hypervisor is VirtualBox. It disables the packaged
+Guest Additions drag-and-drop launch command in
+`/etc/X11/Xsession.d/98vboxadd-xclient`, validates the updated shell file before
+installing it, and stops active drag-and-drop clients. Clipboard, host-version
+checking, seamless mode, and display resizing remain enabled in X11 sessions.
+
+VirtualBox's Wayland client combines clipboard and drag-and-drop support, so the
+task disables that combined client when it is present in the launcher. It does not
+change host-side VM settings, restart `VBoxService`, install Guest Additions, or
+affect non-VirtualBox systems.
 
 ### Responder profiles
 

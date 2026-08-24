@@ -10,6 +10,7 @@ from prepare_debian import cli
 EXPECTED_TASKS = {
     "configure_agents",
     "disable_screen_lock",
+    "disable_virtualbox_drag_and_drop",
     "install_packages",
     "prepare_impacket",
     "prepare_responder",
@@ -47,9 +48,7 @@ def test_no_arguments_run_all_tasks_in_sorted_order(
 
         return run
 
-    monkeypatch.setattr(
-        cli, "TASKS", {name: task(name) for name in ("zeta", "alpha")}
-    )
+    monkeypatch.setattr(cli, "TASKS", {name: task(name) for name in ("zeta", "alpha")})
     monkeypatch.setattr(sys, "argv", ["prepare-debian"])
 
     assert cli.main() == 0
