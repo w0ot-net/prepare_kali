@@ -22,6 +22,21 @@ def test_install_packages_stops_when_cache_update_fails() -> None:
     install.assert_not_called()
 
 
+def test_install_packages_include_requested_system_tools() -> None:
+    assert {
+        "accountsservice",
+        "impacket-scripts",
+        "kali-root-login",
+        "open-vm-tools",
+        "open-vm-tools-desktop",
+        "snmp",
+        "ssh",
+        "tailscale",
+        "virtualbox-guest-x11",
+        "vim",
+    } <= set(install_packages.PACKAGES)
+
+
 def test_prepare_impacket_stops_when_package_install_fails() -> None:
     with (
         mock.patch.object(

@@ -15,6 +15,7 @@ EXPECTED_TASKS = {
     "prepare_impacket",
     "prepare_responder",
     "set_bash_config",
+    "set_root_login",
     "set_shell_to_bash",
     "set_tools",
 }

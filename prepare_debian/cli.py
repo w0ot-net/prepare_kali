@@ -9,6 +9,7 @@ from prepare_debian.tasks import (
     prepare_impacket,
     prepare_responder,
     set_bash_config,
+    set_root_login,
     set_shell_to_bash,
     set_tools,
 )
@@ -22,6 +23,7 @@ TASKS: dict[str, Callable[[], bool]] = {
     "prepare_responder": prepare_responder.main,
     "set_bash_config": set_bash_config.main,
     "install_packages": install_packages.main,
+    "set_root_login": set_root_login.main,
     "set_shell_to_bash": set_shell_to_bash.main,
     "set_tools": set_tools.main,
 }

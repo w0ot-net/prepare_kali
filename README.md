@@ -13,6 +13,7 @@ Debian-derived systems such as Kali Linux, Ubuntu, and Debian.
 - Effective root privileges for the `set_shell_to_bash` task.
 - Effective root privileges for the `disable_virtualbox_drag_and_drop` task on a
   VirtualBox guest.
+- Effective root privileges for the `set_root_login` task.
 
 ## Installation
 
@@ -42,6 +43,7 @@ prepare-debian --task disable_virtualbox_drag_and_drop
 prepare-debian --task configure_agents
 prepare-debian --task install_packages
 prepare-debian --task prepare_responder
+prepare-debian --task set_root_login
 prepare-debian --task install_packages --task set_tools
 ```
 
@@ -65,13 +67,30 @@ Available tasks:
 | `prepare_impacket` | Ensures `python3-impacket` is installed and appends its examples directory to `.profile`, `.bashrc`, and `.zshrc` under the current home directory, creating missing files. | Package-management privileges if installation is needed |
 | `prepare_responder` | Installs Responder when available from apt and generates complete server-on and server-off configuration profiles without changing the active configuration. | Package-management privileges if installation is needed; apt; `/etc/responder/Responder.conf` when installed |
 | `set_bash_config` | Ensures Git and `xclip`, synchronizes `w0ot-net/bash_config` to its reviewed commit pin, and executes that revision's `install.py`. | Package-management privileges, Git, network access; executes externally maintained code |
+| `set_root_login` | Installs Kali's graphical root-login support and AccountsService when missing, then makes root selectable in the LightDM greeter. | Effective root privileges, Kali apt repositories, and LightDM for the selectable user list |
 | `set_shell_to_bash` | Changes Bash to the login shell for root and login-capable users with UID 1000 or greater, then updates `/etc/default/useradd` and `/etc/adduser.conf` when present. | Effective root privileges, `chsh` |
 | `set_tools` | Creates `~/tools` and synchronizes configured `w0ot-net` repositories to reviewed commit pins. | Git and network access |
 
 Tools and `bash_config` are stored under `~/tools` for the user whose home directory
 Python resolves at runtime. Running the whole command through `sudo` may therefore
 target root's home rather than the invoking user's home. Run home-directory tasks as
-the intended user and the system-wide shell task separately when appropriate.
+the intended user and system-wide tasks separately as root when appropriate.
+
+### Graphical root login
+
+`set_root_login` ensures Kali's `kali-root-login` package and AccountsService are
+installed. The Kali package changes the supported display-manager authentication
+configuration so root can log in graphically. The task also marks root as a non-system
+account for the greeter and adds a LightDM configuration drop-in that exposes the user
+list while retaining manual username entry. These persistent settings take effect the
+next time the greeter starts, including after a reboot; the task does not interrupt the
+current graphical session by restarting the display manager.
+
+Root still needs an explicitly configured password. Set one separately with
+`sudo passwd root`. GNOME's GDM does not support including root in its selectable user
+list, so enter `root` manually there; Kali's package configures SDDM to include root.
+Graphical root sessions weaken the protection normally provided by an unprivileged
+desktop account and should be enabled only when that tradeoff is intentional.
 
 ### Desktop idle locking and blanking
 
