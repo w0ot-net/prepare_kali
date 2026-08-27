@@ -2,6 +2,7 @@ from prepare_debian.utils import apt_utils
 
 PACKAGES: list[str] = [
     "accountsservice",
+    "gedit",
     "git",
     "impacket-scripts",
     "kali-root-login",
