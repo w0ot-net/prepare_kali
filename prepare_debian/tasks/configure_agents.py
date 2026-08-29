@@ -30,7 +30,9 @@ DOWNLOAD_USER_AGENT = (
     "(KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
 )
 PROFILE_FILES = (".profile", ".bashrc", ".zshrc")
+INTERACTIVE_SHELL_FILES = (".bashrc", ".zshrc")
 LOCAL_BIN_EXPORT = 'export PATH="$HOME/.local/bin:$PATH"\n'
+CODEX_YOLO_ALIAS = "alias codex='codex --yolo'\n"
 
 
 @dataclass(frozen=True)
@@ -112,6 +114,30 @@ def ensure_local_bin_on_path(home: Path) -> bool:
         output_utils.ok("Added ~/.local/bin to shell PATH configuration.")
     else:
         output_utils.ok("~/.local/bin already configured in shell PATH.")
+    return True
+
+
+def ensure_codex_yolo_alias(home: Path) -> bool:
+    updated = False
+    for filename in INTERACTIVE_SHELL_FILES:
+        path = home / filename
+        try:
+            content = path.read_text(encoding="utf-8") if path.exists() else ""
+            if CODEX_YOLO_ALIAS.rstrip("\n") in content.splitlines():
+                continue
+            with path.open("a", encoding="utf-8") as profile:
+                if content and not content.endswith("\n"):
+                    profile.write("\n")
+                profile.write(CODEX_YOLO_ALIAS)
+            updated = True
+        except OSError as exc:
+            output_utils.warn(f"Could not update {path}: {exc}")
+            return False
+
+    if updated:
+        output_utils.ok("Configured Codex to run with --yolo in Bash and Zsh.")
+    else:
+        output_utils.ok("Codex --yolo shell aliases already configured.")
     return True
 
 
@@ -242,6 +268,9 @@ def main() -> bool:
     for spec in CLI_SPECS:
         if not ensure_cli(spec, home):
             return False
+
+    if not ensure_codex_yolo_alias(home):
+        return False
 
     if not set_tools.ensure_tools_dir():
         return False

@@ -60,7 +60,7 @@ Available tasks:
 
 | Task | Effect | Main requirements |
 | --- | --- | --- |
-| `configure_agents` | Disables Codex/Claude attribution, installs either CLI when missing, synchronizes the pinned coding-agent helpers, and links their skills for both CLIs. | Network access, Git, `sh`, `bash`, and write access to the user's config, `~/.local`, `~/.agents`, `~/.claude`, and `~/tools` paths |
+| `configure_agents` | Disables Codex/Claude attribution, installs either CLI when missing, defaults interactive Codex sessions to `--yolo`, synchronizes the pinned coding-agent helpers, and links their skills for both CLIs. | Network access, Git, `sh`, `bash`, and write access to the user's config, `~/.local`, `~/.agents`, `~/.claude`, and `~/tools` paths |
 | `disable_screen_lock` | Disables idle screen locking and display blanking. A root GNOME invocation installs a locked system policy for every user; other invocations configure the active user's GNOME or XFCE session. | Root for the system-wide GNOME policy, or run as the intended user inside a GNOME or XFCE graphical session; `dconf` and `gsettings`, or `xfconf-query` and `xset` |
 | `disable_virtualbox_drag_and_drop` | Persistently disables VirtualBox Guest Additions drag and drop and stops its active clients. | Effective root privileges on a VirtualBox guest; `systemd-detect-virt`, `pkill`, and the packaged Guest Additions X11 session launcher when installed |
 | `install_packages` | Updates apt metadata and installs the packages listed in `prepare_debian/tasks/install_packages.py`. | Package-management privileges, apt, network access |
@@ -166,9 +166,13 @@ missing, downloads and executes that vendor's current official standalone instal
 These installer URLs execute current external code and are not version-pinned by this
 project. After installation the task locates the command on `PATH` or under
 `~/.local/bin` and verifies `--version`. The task adds `~/.local/bin` to `.profile`,
-`.bashrc`, and `.zshrc`; start a new shell after the first run. Installers run without
-prompts, and a root invocation explicitly permits Claude's root-scoped installation.
-Signing in, choosing an account, and configuring API credentials remain manual steps.
+`.bashrc`, and `.zshrc`. It also adds `alias codex='codex --yolo'` to `.bashrc` and
+`.zshrc`, so interactive Codex sessions run without approval prompts or sandboxing.
+This grants Codex unrestricted command execution and should only be used in an
+externally isolated environment. Start a new shell after the first run. Installers run
+without prompts, and a root invocation explicitly permits Claude's root-scoped
+installation. Signing in, choosing an account, and configuring API credentials remain
+manual steps.
 
 The `coding_agent_helpers` repository is synchronized under
 `~/tools/coding_agent_helpers` at the reviewed commit in

@@ -92,6 +92,24 @@ def test_local_bin_is_added_to_shell_profiles_idempotently(tmp_path: Path) -> No
     assert bashrc.read_text(encoding="utf-8").startswith("# existing\n")
 
 
+def test_codex_yolo_alias_is_added_to_interactive_shells_idempotently(
+    tmp_path: Path,
+) -> None:
+    bashrc = tmp_path / ".bashrc"
+    bashrc.write_text(
+        f"# existing\n# {configure_agents.CODEX_YOLO_ALIAS}", encoding="utf-8"
+    )
+
+    assert configure_agents.ensure_codex_yolo_alias(tmp_path) is True
+    assert configure_agents.ensure_codex_yolo_alias(tmp_path) is True
+
+    for filename in configure_agents.INTERACTIVE_SHELL_FILES:
+        content = (tmp_path / filename).read_text(encoding="utf-8")
+        alias = configure_agents.CODEX_YOLO_ALIAS.rstrip("\n")
+        assert content.splitlines().count(alias) == 1
+    assert bashrc.read_text(encoding="utf-8").startswith("# existing\n")
+
+
 def test_existing_cli_skips_installer(tmp_path: Path) -> None:
     spec = configure_agents.CLI_SPECS[0]
     executable = tmp_path / spec.command
@@ -228,6 +246,9 @@ def test_repository_failure_prevents_skill_installation() -> None:
             configure_agents, "ensure_local_bin_on_path", return_value=True
         ),
         mock.patch.object(configure_agents, "ensure_cli", return_value=True),
+        mock.patch.object(
+            configure_agents, "ensure_codex_yolo_alias", return_value=True
+        ),
         mock.patch.object(
             configure_agents.set_tools, "ensure_tools_dir", return_value=True
         ),
