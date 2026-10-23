@@ -43,16 +43,17 @@ prepare-debian --task disable_virtualbox_drag_and_drop
 prepare-debian --task configure_agents
 prepare-debian --task install_packages
 prepare-debian --task prepare_responder
+prepare-debian --task restart_virtualbox_guest
 prepare-debian --task set_root_login
 prepare-debian --task install_packages --task set_tools
 ```
 
 Running `python3 main.py`, `./main.py`, `python3 -m prepare_debian`, or the installed
-`prepare-debian` command without options runs every task in alphabetical order. Use
-`--task` to run only a specific task; repeat it to run several tasks in the supplied
-order. Tasks use their existing state checks for idempotence. The runner stops at the
-first failed task and returns status 1; it does not roll back earlier successful
-changes.
+`prepare-debian` command without options runs every setup task in alphabetical order.
+Operational helpers such as `restart_virtualbox_guest` are opt-in. Use `--task` to run
+only a specific task; repeat it to run several tasks in the supplied order. Tasks use
+their existing state checks for idempotence. The runner stops at the first failed task
+and returns status 1; it does not roll back earlier successful changes.
 
 ## Tasks
 
@@ -66,6 +67,7 @@ Available tasks:
 | `install_packages` | Updates apt metadata and installs the packages listed in `prepare_debian/tasks/install_packages.py`. | Package-management privileges, apt, network access |
 | `prepare_impacket` | Ensures `python3-impacket` is installed and appends its examples directory to `.profile`, `.bashrc`, and `.zshrc` under the current home directory, creating missing files. | Package-management privileges if installation is needed |
 | `prepare_responder` | Installs Responder when available from apt and generates complete server-on and server-off configuration profiles without changing the active configuration. | Package-management privileges if installation is needed; apt; `/etc/responder/Responder.conf` when installed |
+| `restart_virtualbox_guest` | Opt-in helper that restarts installed Guest Additions services and the current X11 user's desktop clients without starting drag and drop. | A VirtualBox X11 guest session; `systemctl`, `VBoxClient`, `pkill`, and `sudo` when not root |
 | `set_bash_config` | Ensures Git and `xclip`, synchronizes `w0ot-net/bash_config` to its reviewed commit pin, and executes that revision's `install.py`. | Package-management privileges, Git, network access; executes externally maintained code |
 | `set_root_login` | Installs Kali's graphical root-login support and AccountsService when missing, then makes root selectable in the LightDM greeter. | Effective root privileges, Kali apt repositories, and LightDM for the selectable user list |
 | `set_shell_to_bash` | Changes Bash to the login shell for root and login-capable users with UID 1000 or greater, then updates `/etc/default/useradd` and `/etc/adduser.conf` when present. | Effective root privileges, `chsh` |
@@ -128,6 +130,27 @@ VirtualBox's Wayland client combines clipboard and drag-and-drop support, so the
 task disables that combined client when it is present in the launcher. It does not
 change host-side VM settings, restart `VBoxService`, install Guest Additions, or
 affect non-VirtualBox systems.
+
+### Restarting VirtualBox Guest Additions
+
+From a terminal inside the logged-in X11 desktop session, restart the Guest Additions
+service and every packaged desktop client except drag and drop with:
+
+```sh
+python3 main.py --task restart_virtualbox_guest
+```
+
+The helper restarts each installed `virtualbox-guest-utils.service` or
+`vboxadd-service.service` unit, stops only the current user's `VBoxClient` processes,
+removes that user's stale `.vboxclient-*.pid` files, and discovers the client modes to
+restart from `/etc/X11/Xsession.d/98vboxadd-xclient`. It always excludes
+`--draganddrop` and `--wayland`; VirtualBox's Wayland client combines clipboard with
+drag and drop and therefore cannot meet this helper's no-drag-and-drop guarantee.
+
+Run the command as the desktop user, without putting `sudo` in front of the whole
+command. The helper invokes `sudo` only for the system-service restart. A genuine root
+desktop session is supported. Non-VirtualBox systems are a successful no-op, and this
+operational helper is not run by the default all-setup-tasks invocation.
 
 ### Responder profiles
 

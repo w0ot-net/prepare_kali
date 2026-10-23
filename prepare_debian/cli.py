@@ -8,6 +8,7 @@ from prepare_debian.tasks import (
     install_packages,
     prepare_impacket,
     prepare_responder,
+    restart_virtualbox_guest,
     set_bash_config,
     set_root_login,
     set_shell_to_bash,
@@ -21,12 +22,14 @@ TASKS: dict[str, Callable[[], bool]] = {
     "disable_virtualbox_drag_and_drop": disable_virtualbox_drag_and_drop.main,
     "prepare_impacket": prepare_impacket.main,
     "prepare_responder": prepare_responder.main,
+    "restart_virtualbox_guest": restart_virtualbox_guest.main,
     "set_bash_config": set_bash_config.main,
     "install_packages": install_packages.main,
     "set_root_login": set_root_login.main,
     "set_shell_to_bash": set_shell_to_bash.main,
     "set_tools": set_tools.main,
 }
+OPT_IN_TASKS = {"restart_virtualbox_guest"}
 
 
 def parse_args() -> argparse.Namespace:
@@ -42,7 +45,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    selected_tasks = args.task or sorted(TASKS)
+    selected_tasks = args.task or sorted(TASKS.keys() - OPT_IN_TASKS)
     for name in selected_tasks:
         output_utils.banner(f"== prepare_debian :: {name} ==")
         if not TASKS[name]():
