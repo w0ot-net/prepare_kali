@@ -1,4 +1,5 @@
 import os
+import shlex
 import stat
 import subprocess
 import tempfile
@@ -19,6 +20,7 @@ CLIENT_PATTERNS = (
     ("drag-and-drop", r"^/usr/bin/VBoxClient --draganddrop$"),
     ("Wayland", r"^/usr/bin/VBoxClient --wayland$"),
 )
+MANAGED_CLIENT_MODES = ("draganddrop", "wayland")
 
 
 def _successful(result: Optional[subprocess.CompletedProcess[str]]) -> bool:
@@ -34,6 +36,19 @@ def detect_virtualbox() -> Optional[bool]:
     return result.stdout.strip().casefold() == "oracle"
 
 
+def _managed_client_mode(command: str) -> Optional[str]:
+    try:
+        tokens = shlex.split(command, comments=True, posix=True)
+    except ValueError:
+        return None
+
+    for mode in MANAGED_CLIENT_MODES:
+        expected = ["/usr/bin/VBoxClient", f"--{mode}"]
+        if tokens == expected or tokens == [*expected, "||", "true"]:
+            return mode
+    return None
+
+
 def render_launcher(content: str) -> str:
     lines = content.splitlines(keepends=True)
     rendered: list[str] = []
@@ -44,10 +59,11 @@ def render_launcher(content: str) -> str:
         stripped = body.strip()
         indentation = body[: len(body) - len(body.lstrip())]
 
-        if stripped == DRAG_AND_DROP_COMMAND:
+        managed_mode = _managed_client_mode(stripped)
+        if managed_mode == "draganddrop":
             rendered.append(f"{indentation}{DRAG_AND_DROP_COMMENT}{ending}")
             continue
-        if stripped == WAYLAND_COMMAND:
+        if managed_mode == "wayland":
             separator = ending or "\n"
             rendered.append(f"{indentation}{WAYLAND_COMMENT}{separator}")
             rendered.append(f"{indentation}true{ending}")

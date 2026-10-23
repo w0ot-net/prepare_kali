@@ -18,6 +18,16 @@ else
 fi
 """
 
+CURRENT_PACKAGED_LAUNCHER = """#!/bin/sh
+elif test -z "${SSH_CONNECTION}"; then
+    /usr/bin/VBoxClient --clipboard        || true
+    /usr/bin/VBoxClient --seamless         || true # Currently does nothing for Wayland.
+    /usr/bin/VBoxClient --draganddrop      || true # Currently does nothing for Wayland.
+    /usr/bin/VBoxClient --checkhostversion || true
+    /usr/bin/VBoxClient --vmsvga-session   || true # In case VMSVGA emulation is enabled
+fi
+"""
+
 
 def result(
     returncode: int = 0, stdout: str = "", stderr: str = ""
@@ -35,6 +45,19 @@ def test_launcher_disables_only_drag_and_drop_clients() -> None:
     assert "/usr/bin/VBoxClient --seamless || true" in rendered
     assert disable_vbox.DRAG_AND_DROP_COMMENT in rendered
     assert disable_vbox.WAYLAND_COMMENT in rendered
+    assert disable_vbox.render_launcher(rendered) == rendered
+
+
+def test_launcher_accepts_packaged_spacing_and_trailing_comments() -> None:
+    rendered = disable_vbox.render_launcher(CURRENT_PACKAGED_LAUNCHER)
+
+    assert "--draganddrop" not in rendered
+    assert (
+        "/usr/bin/VBoxClient --seamless         || true "
+        "# Currently does nothing for Wayland."
+    ) in rendered
+    assert "/usr/bin/VBoxClient --vmsvga-session   || true" in rendered
+    assert disable_vbox.DRAG_AND_DROP_COMMENT in rendered
     assert disable_vbox.render_launcher(rendered) == rendered
 
 
