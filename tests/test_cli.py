@@ -14,7 +14,6 @@ EXPECTED_TASKS = {
     "install_packages",
     "prepare_impacket",
     "prepare_responder",
-    "restart_virtualbox_guest",
     "set_bash_config",
     "set_root_login",
     "set_shell_to_bash",
@@ -55,21 +54,6 @@ def test_no_arguments_run_all_tasks_in_sorted_order(
 
     assert cli.main() == 0
     assert calls == ["alpha", "zeta"]
-
-
-def test_no_arguments_skip_opt_in_tasks(monkeypatch: pytest.MonkeyPatch) -> None:
-    default = mock.Mock(return_value=True)
-    opt_in = mock.Mock(return_value=True)
-    monkeypatch.setattr(
-        cli,
-        "TASKS",
-        {"default": default, "restart_virtualbox_guest": opt_in},
-    )
-    monkeypatch.setattr(sys, "argv", ["prepare-debian"])
-
-    assert cli.main() == 0
-    default.assert_called_once_with()
-    opt_in.assert_not_called()
 
 
 def test_repeated_tasks_run_in_supplied_order(monkeypatch: pytest.MonkeyPatch) -> None:
