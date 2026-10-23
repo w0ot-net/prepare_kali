@@ -54,7 +54,7 @@ TOOL_REPOSITORIES = (
 BASH_CONFIG_REPOSITORY = RepositorySpec(
     "bash_config",
     "https://github.com/w0ot-net/bash_config",
-    "bb3eb930c26dea2a0c1db5b68e7e9fbf7c7e9f38",
+    "1074b36278d4e8e2e7554c6ce120edb0072bcb3d",
 )
 
 CODING_AGENT_HELPERS_REPOSITORY = RepositorySpec(
