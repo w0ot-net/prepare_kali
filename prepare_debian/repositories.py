@@ -10,6 +10,11 @@ class RepositorySpec:
 
 TOOL_REPOSITORIES = (
     RepositorySpec(
+        "nwrapper",
+        "https://github.com/w0ot-net/nwrapper",
+        "9189abece36c265345013a162e8b47743e51357f",
+    ),
+    RepositorySpec(
         "share_sniffer",
         "https://github.com/w0ot-net/share_sniffer",
         "9f1572ab93dd9becd6039a5fc022b0a46ac0b7d9",

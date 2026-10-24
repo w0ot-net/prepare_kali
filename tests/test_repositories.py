@@ -14,7 +14,8 @@ def test_production_repository_specs_are_unique_and_immutable() -> None:
         CODING_AGENT_HELPERS_REPOSITORY,
     )
 
-    assert len(TOOL_REPOSITORIES) == 8
+    assert len(TOOL_REPOSITORIES) == 9
+    assert any(repository.name == "nwrapper" for repository in TOOL_REPOSITORIES)
     assert len({repository.name for repository in repositories}) == len(repositories)
     assert len({repository.url for repository in repositories}) == len(repositories)
     assert all(
