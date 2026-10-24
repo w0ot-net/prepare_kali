@@ -259,4 +259,4 @@ def main() -> bool:
         "Could not identify GNOME or XFCE. Run this task as the intended user "
         "from a terminal inside the graphical session."
     )
-    return False
+    return True

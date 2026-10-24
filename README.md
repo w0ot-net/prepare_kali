@@ -106,6 +106,9 @@ screensaver and DPMS timers. Every persistent value is read back. If the XFCE
 screensaver is running, its current state is deactivated and reset; no screensaver
 process is started or stopped.
 
+If neither GNOME nor XFCE can be identified, the task prints a warning and skips the
+desktop-specific configuration without stopping the remaining preparation tasks.
+
 Run this task as root from a GNOME graphical session to enforce the policy for every
 GNOME user. Otherwise, run it as the intended desktop user from a terminal within the
 graphical session. It intentionally weakens a physical-access security control: the

@@ -252,13 +252,15 @@ def test_read_back_mismatch_is_propagated() -> None:
         assert disable_screen_lock.configure_gnome() is False
 
 
-def test_unknown_desktop_main_does_not_run_a_backend() -> None:
+def test_unknown_desktop_main_warns_and_skips_without_failing() -> None:
     with (
         mock.patch.object(disable_screen_lock, "detect_desktop", return_value=None),
         mock.patch.object(disable_screen_lock, "configure_gnome") as gnome,
         mock.patch.object(disable_screen_lock, "configure_xfce") as xfce,
+        mock.patch.object(disable_screen_lock.output_utils, "warn") as warn,
     ):
-        assert disable_screen_lock.main() is False
+        assert disable_screen_lock.main() is True
 
     gnome.assert_not_called()
     xfce.assert_not_called()
+    warn.assert_called_once()
