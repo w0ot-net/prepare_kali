@@ -53,8 +53,8 @@ def test_prepare_impacket_stops_when_package_install_fails() -> None:
 
 def test_set_tools_aggregates_repository_failures() -> None:
     repositories = (
-        RepositorySpec("one", "https://example.com/one", "1" * 40),
-        RepositorySpec("two", "https://example.com/two", "2" * 40),
+        RepositorySpec("one", "https://example.com/one"),
+        RepositorySpec("two", "https://example.com/two"),
     )
     with (
         mock.patch.object(set_tools, "ensure_tools_dir", return_value=True),

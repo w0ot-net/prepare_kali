@@ -36,14 +36,11 @@ def _command_value(path: Path, *arguments: str) -> Optional[str]:
 
 def synchronize_repository(spec: RepositorySpec, tools_dir: Path = TOOLS_DIR) -> bool:
     path = repository_path(spec, tools_dir)
-    short_revision = spec.revision[:12]
     new_clone = not path.exists()
 
     if new_clone:
-        output_utils.info(f"Cloning {spec.name} at {short_revision} into {path}.")
-        clone = process_utils.run(
-            ["git", "clone", "--no-checkout", spec.url, str(path)]
-        )
+        output_utils.info(f"Cloning {spec.name} into {path}.")
+        clone = process_utils.run(["git", "clone", spec.url, str(path)])
         if clone is None or clone.returncode != 0:
             stderr = clone.stderr.strip() if clone is not None else ""
             output_utils.warn(stderr or f"Failed to clone {spec.url}.")
@@ -69,42 +66,72 @@ def synchronize_repository(spec: RepositorySpec, tools_dir: Path = TOOLS_DIR) ->
             output_utils.warn(f"{path} has local changes; refusing to modify it.")
             return False
 
-    current = _command_value(path, "rev-parse", "HEAD")
-    if not new_clone and current == spec.revision:
-        output_utils.ok(f"{spec.name} already pinned at {short_revision}.")
-        return True
+    previous = _command_value(path, "rev-parse", "HEAD")
+    if previous is None:
+        return False
 
-    output_utils.info(f"Synchronizing {spec.name} to {short_revision}.")
-    fetch = _git(path, "fetch", "origin", spec.revision)
+    output_utils.info(f"Updating {spec.name} from its remote default branch.")
+    fetch = _git(path, "fetch", "--prune", "origin")
     if fetch is None or fetch.returncode != 0:
         stderr = fetch.stderr.strip() if fetch is not None else ""
         output_utils.warn(stderr or f"Failed to fetch {spec.name}.")
         return False
 
-    commit = _command_value(
-        path, "rev-parse", "--verify", f"{spec.revision}^{{commit}}"
-    )
-    if commit != spec.revision:
+    set_head = _git(path, "remote", "set-head", "origin", "--auto")
+    if set_head is None or set_head.returncode != 0:
+        stderr = set_head.stderr.strip() if set_head is not None else ""
         output_utils.warn(
-            f"Pinned commit is unavailable for {spec.name}: {spec.revision}"
+            stderr or f"Could not determine the default branch for {spec.name}."
         )
         return False
 
-    checkout = _git(path, "checkout", "--detach", spec.revision)
+    remote_ref = _command_value(
+        path, "symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD"
+    )
+    prefix = "origin/"
+    if remote_ref is None or not remote_ref.startswith(prefix):
+        output_utils.warn(f"Could not determine the default branch for {spec.name}.")
+        return False
+    branch = remote_ref.removeprefix(prefix)
+
+    local_branch = _git(path, "show-ref", "--verify", "--quiet", f"refs/heads/{branch}")
+    if local_branch is not None and local_branch.returncode == 0:
+        checkout = _git(path, "checkout", branch)
+    else:
+        checkout = _git(path, "checkout", "--track", "-b", branch, remote_ref)
     if checkout is None or checkout.returncode != 0:
         stderr = checkout.stderr.strip() if checkout is not None else ""
-        output_utils.warn(stderr or f"Failed to check out {spec.name}.")
+        output_utils.warn(stderr or f"Failed to check out {spec.name} branch {branch}.")
+        return False
+
+    upstream = _git(path, "branch", f"--set-upstream-to={remote_ref}", branch)
+    if upstream is None or upstream.returncode != 0:
+        stderr = upstream.stderr.strip() if upstream is not None else ""
+        output_utils.warn(
+            stderr or f"Failed to configure the upstream branch for {spec.name}."
+        )
+        return False
+
+    merged = _git(path, "merge", "--ff-only", remote_ref)
+    if merged is None or merged.returncode != 0:
+        stderr = merged.stderr.strip() if merged is not None else ""
+        output_utils.warn(
+            stderr or f"Could not fast-forward {spec.name} from {remote_ref}."
+        )
         return False
 
     final = _command_value(path, "rev-parse", "HEAD")
-    if final != spec.revision:
+    remote = _command_value(path, "rev-parse", "--verify", f"{remote_ref}^{{commit}}")
+    if final is None or final != remote:
         output_utils.warn(
-            f"Revision mismatch for {spec.name}: expected {spec.revision}, "
-            f"found {final}."
+            f"Revision mismatch for {spec.name}: expected {remote_ref}, found {final}."
         )
         return False
 
-    output_utils.ok(f"Pinned {spec.name} at {short_revision}.")
+    if final == previous:
+        output_utils.ok(f"{spec.name} already current on {branch}.")
+    else:
+        output_utils.ok(f"Updated {spec.name} on {branch}.")
     return True
 
 

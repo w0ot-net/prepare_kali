@@ -1,5 +1,3 @@
-import re
-
 from prepare_debian.repositories import (
     BASH_CONFIG_REPOSITORY,
     CODING_AGENT_HELPERS_REPOSITORY,
@@ -7,7 +5,7 @@ from prepare_debian.repositories import (
 )
 
 
-def test_production_repository_specs_are_unique_and_immutable() -> None:
+def test_production_repository_specs_are_unique() -> None:
     repositories = (
         *TOOL_REPOSITORIES,
         BASH_CONFIG_REPOSITORY,
@@ -18,7 +16,3 @@ def test_production_repository_specs_are_unique_and_immutable() -> None:
     assert any(repository.name == "nwrapper" for repository in TOOL_REPOSITORIES)
     assert len({repository.name for repository in repositories}) == len(repositories)
     assert len({repository.url for repository in repositories}) == len(repositories)
-    assert all(
-        re.fullmatch(r"[0-9a-f]{40}", repository.revision)
-        for repository in repositories
-    )

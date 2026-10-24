@@ -37,8 +37,5 @@ def main() -> bool:
         return False
     if not ensure_bash_config_repo():
         return False
-    output_utils.info(
-        "Executing bash_config installer from pin "
-        f"{BASH_CONFIG_REPOSITORY.revision[:12]}."
-    )
+    output_utils.info("Executing bash_config installer from the updated checkout.")
     return run_install()

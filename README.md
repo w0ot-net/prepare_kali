@@ -60,16 +60,16 @@ Available tasks:
 
 | Task | Effect | Main requirements |
 | --- | --- | --- |
-| `configure_agents` | Disables Codex/Claude attribution, installs either CLI when missing, defaults interactive Codex sessions to `--yolo`, synchronizes the pinned coding-agent helpers, and links their skills for both CLIs. | Network access, Git, `sh`, `bash`, and write access to the user's config, `~/.local`, `~/.agents`, `~/.claude`, and `~/tools` paths |
+| `configure_agents` | Disables Codex/Claude attribution, installs either CLI when missing, defaults interactive Codex sessions to `--yolo`, updates the coding-agent helpers, and links their skills for both CLIs. | Network access, Git, `sh`, `bash`, and write access to the user's config, `~/.local`, `~/.agents`, `~/.claude`, and `~/tools` paths |
 | `disable_screen_lock` | Disables idle screen locking and display blanking. A root GNOME invocation installs a locked system policy for every user; other invocations configure the active user's GNOME or XFCE session. | Root for the system-wide GNOME policy, or run as the intended user inside a GNOME or XFCE graphical session; `dconf` and `gsettings`, or `xfconf-query` and `xset` |
 | `disable_virtualbox_drag_and_drop` | Persistently disables VirtualBox Guest Additions drag and drop and stops its active clients. | Effective root privileges on a VirtualBox guest; `systemd-detect-virt`, `pkill`, and the packaged Guest Additions X11 session launcher when installed |
 | `install_packages` | Updates apt metadata and installs the packages listed in `prepare_debian/tasks/install_packages.py`. | Package-management privileges, apt, network access |
 | `prepare_impacket` | Ensures `python3-impacket` is installed and appends its examples directory to `.profile`, `.bashrc`, and `.zshrc` under the current home directory, creating missing files. | Package-management privileges if installation is needed |
 | `prepare_responder` | Installs Responder when available from apt and generates complete server-on and server-off configuration profiles without changing the active configuration. | Package-management privileges if installation is needed; apt; `/etc/responder/Responder.conf` when installed |
-| `set_bash_config` | Ensures Git and `xclip`, synchronizes `w0ot-net/bash_config` to its reviewed commit pin, and executes that revision's `install.py`. | Package-management privileges, Git, network access; executes externally maintained code |
+| `set_bash_config` | Ensures Git and `xclip`, updates `w0ot-net/bash_config` from its default branch, and executes its `install.py`. | Package-management privileges, Git, network access; executes externally maintained code |
 | `set_root_login` | Installs Kali's graphical root-login support and AccountsService when missing, then makes root selectable in the LightDM greeter. | Effective root privileges, Kali apt repositories, and LightDM for the selectable user list |
 | `set_shell_to_bash` | Changes Bash to the login shell for root and login-capable users with UID 1000 or greater, then updates `/etc/default/useradd` and `/etc/adduser.conf` when present. | Effective root privileges, `chsh` |
-| `set_tools` | Creates `~/tools` and synchronizes configured `w0ot-net` repositories to reviewed commit pins. | Git and network access |
+| `set_tools` | Creates `~/tools` and fast-forwards configured `w0ot-net` repositories from their remote default branches. | Git and network access |
 
 Tools and `bash_config` are stored under `~/tools` for the user whose home directory
 Python resolves at runtime. Running the whole command through `sudo` may therefore
@@ -178,27 +178,27 @@ installation. Signing in, choosing an account, and configuring API credentials r
 manual steps.
 
 The `coding_agent_helpers` repository is synchronized under
-`~/tools/coding_agent_helpers` at the reviewed commit in
-`prepare_debian/repositories.py`. Each immediate child of its `skills/` directory that
-contains `SKILL.md` is symlinked into both `~/.claude/skills` and
-`~/.agents/skills`. Correct links are left unchanged and stale links owned by that
-checkout are removed. A real file, directory, or link pointing elsewhere is preserved
-and causes the task to fail rather than overwrite a user-owned skill.
+`~/tools/coding_agent_helpers` from its remote default branch. Each immediate child of
+its `skills/` directory that contains `SKILL.md` is symlinked into both
+`~/.claude/skills` and `~/.agents/skills`. Correct links are left unchanged and stale
+links owned by that checkout are removed. A real file, directory, or link pointing
+elsewhere is preserved and causes the task to fail rather than overwrite a user-owned
+skill.
 
-### Managed repository pins
+### Managed repository updates
 
-External repository identities and full commit pins are defined in
-`prepare_debian/repositories.py`. Managed checkouts live under `~/tools`, use detached
-HEADs, and are accepted only when their `origin` URL matches, the worktree is clean,
-and the final HEAD equals the configured pin. The tasks never merge a branch, reset,
-clean, stash, or overwrite local changes; a dirty checkout or unexpected origin fails
-with a diagnostic for manual resolution.
+External repository identities are defined in `prepare_debian/repositories.py`.
+Managed checkouts live under `~/tools` on their remote default branches with normal
+upstream tracking, so ordinary `git pull` works. Each task verifies the `origin` URL
+and a clean worktree, fetches the remote, and performs only a fast-forward update.
+Existing detached checkouts created by older `prepare_kali` versions are reattached to
+the default branch automatically. A dirty checkout, unexpected origin, or diverged
+branch is preserved and causes a diagnostic failure; the tasks never reset, clean,
+stash, or overwrite local work.
 
-To update a pin, inspect and review the upstream change, replace the full SHA in
-`prepare_debian/repositories.py`, and run the focused repository tests before applying
-the task. Pinning selects exact source but does not audit or sandbox it. In particular,
-`set_bash_config` executes the pinned external `install.py` after Git verification, so
-review that revision before intentionally changing its pin.
+These repositories are not version-pinned. In particular, `set_bash_config` executes
+the current external `install.py` after updating its checkout, so upstream changes
+should be trusted or reviewed before running the task.
 
 ## Exit status
 
