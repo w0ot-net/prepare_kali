@@ -13,7 +13,6 @@ EXPECTED_TASKS = {
     "disable_virtualbox_drag_and_drop",
     "install_packages",
     "prepare_impacket",
-    "prepare_java_tools",
     "prepare_responder",
     "set_bash_config",
     "set_root_login",

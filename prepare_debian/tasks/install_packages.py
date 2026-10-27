@@ -2,7 +2,6 @@ from prepare_debian.utils import apt_utils
 
 PACKAGES: list[str] = [
     "accountsservice",
-    "default-jre-headless",
     "gedit",
     "git",
     "impacket-scripts",

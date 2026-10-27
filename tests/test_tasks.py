@@ -25,7 +25,6 @@ def test_install_packages_stops_when_cache_update_fails() -> None:
 def test_install_packages_include_requested_system_tools() -> None:
     assert {
         "accountsservice",
-        "default-jre-headless",
         "gedit",
         "impacket-scripts",
         "kali-root-login",
