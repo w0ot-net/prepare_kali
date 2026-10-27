@@ -14,6 +14,7 @@ Debian-derived systems such as Kali Linux, Ubuntu, and Debian.
 - Effective root privileges for the `disable_virtualbox_drag_and_drop` task on a
   VirtualBox guest.
 - Effective root privileges for the `set_root_login` task.
+- Effective root privileges for the `prepare_java_tools` task.
 
 ## Installation
 
@@ -43,6 +44,7 @@ prepare-debian --task disable_virtualbox_drag_and_drop
 prepare-debian --task configure_agents
 prepare-debian --task install_packages
 prepare-debian --task prepare_responder
+prepare-debian --task prepare_java_tools
 prepare-debian --task set_root_login
 prepare-debian --task install_packages --task set_tools
 ```
@@ -65,6 +67,7 @@ Available tasks:
 | `disable_virtualbox_drag_and_drop` | Persistently disables VirtualBox Guest Additions drag and drop and stops its active clients. | Effective root privileges on a VirtualBox guest; `systemd-detect-virt`, `pkill`, and the packaged Guest Additions X11 session launcher when installed |
 | `install_packages` | Updates apt metadata and installs the packages listed in `prepare_debian/tasks/install_packages.py`. | Package-management privileges, apt, network access |
 | `prepare_impacket` | Ensures `python3-impacket` is installed and appends its examples directory to `.profile`, `.bashrc`, and `.zshrc` under the current home directory, creating missing files. | Package-management privileges if installation is needed |
+| `prepare_java_tools` | Installs the current Beanshooter and ysoserial release JARs with command-line launchers. | Effective root privileges, Java, and network access to GitHub |
 | `prepare_responder` | Installs Responder when available from apt and generates complete server-on and server-off configuration profiles without changing the active configuration. | Package-management privileges if installation is needed; apt; `/etc/responder/Responder.conf` when installed |
 | `set_bash_config` | Ensures Git and `xclip`, updates `w0ot-net/bash_config` from its default branch, and executes its `install.py`. | Package-management privileges, Git, network access; executes externally maintained code |
 | `set_root_login` | Installs Kali's graphical root-login support and AccountsService when missing, then makes root selectable in the LightDM greeter. | Effective root privileges, Kali apt repositories, and LightDM for the selectable user list |
@@ -150,6 +153,18 @@ with:
 ```sh
 cp /etc/responder/Responder.conf.servers-off /etc/responder/Responder.conf
 ```
+
+### Java security tools
+
+`prepare_java_tools` installs the latest official release JARs for Beanshooter and
+ysoserial rather than cloning their source repositories or requiring Maven. The JARs
+are stored at `/opt/beanshooter.jar` and `/opt/yso.jar`, with `beanshooter` and
+`ysoserial` launchers under `/usr/local/bin`. Beanshooter's bundled configuration
+already uses `/opt/yso.jar`, so its ysoserial-backed operations work without an extra
+path option.
+
+The task records each installed release tag and skips unchanged JARs. Releases are not
+version-pinned; rerunning the task checks GitHub for and installs a newer release.
 
 ### Agent configuration
 
