@@ -176,3 +176,63 @@ of truth.
 - Existing tools remain under `~/tools`; no other files are moved into `/opt`.
 - Conflicting unmanaged paths are preserved and reported rather than silently
   replaced.
+
+## Execution Notes (2026-10-27)
+
+### Implemented
+
+- Added the root-only `prepare_java_tools` task and registered it for selected
+  and default runs.
+- Added `default-jre-headless` to the apt package contract and retained a
+  direct package check for standalone task execution.
+- Added latest-release discovery and atomic, tag-aware installation of the
+  official Beanshooter and ysoserial JARs below the existing `~/tools` owner.
+- Added managed launchers under `~/.local/bin` and reused the existing profile
+  PATH configuration.
+- Added the exact `/opt/yso.jar` compatibility symlink while preserving any
+  conflicting unmanaged path.
+- Documented the paths, update behavior, root requirement, and `/opt` boundary.
+
+### Changed Files and Ownership Boundaries
+
+- Added `prepare_debian/tasks/prepare_java_tools.py` as the sole owner of Java
+  release discovery, JAR state, launchers, and the compatibility symlink.
+- Updated `prepare_debian/tasks/install_packages.py` and
+  `prepare_debian/cli.py` for the package and public task contracts.
+- Added `tests/test_prepare_java_tools.py` and updated the existing package and
+  CLI registry tests.
+- Updated `README.md`; repository synchronization and all existing managed tool
+  locations remain unchanged.
+
+### Deviations
+
+- No material implementation deviation was required. The disposable acceptance
+  check used real upstream releases in temporary `tools`, home, and `opt`
+  directories on the development host rather than mutating this host's
+  `/root/tools` and `/opt` paths. Unit tests cover the root/package orchestration
+  and the same path behavior.
+
+### Validation
+
+- `python3 -m pytest -q tests/test_prepare_java_tools.py tests/test_tasks.py tests/test_cli.py`:
+  25 passed.
+- `python3 -m pytest -q`: 91 passed.
+- `ruff check .`: passed.
+- `ruff format --check .`: 48 files already formatted.
+- `mypy prepare_debian tests`: no issues in 34 source files.
+- `git diff --check`: passed.
+- A live temporary install downloaded Beanshooter `v4.1.0` and ysoserial
+  `v0.0.6`, verified their real launchers and absolute compatibility symlink,
+  and proved unchanged reruns do not redownload either JAR. Beanshooter's help
+  invocation exits `1` and ysoserial's usage invocation exits `64` upstream;
+  both emitted their expected application output through the managed launchers.
+
+### Implementation Commit
+
+- `b96a469` — Install Beanshooter and ysoserial under tools.
+
+### Open Items
+
+- No implementation blocker remains. The documented root invocation on a
+  target Kali workstation remains the environment-specific acceptance check
+  after pulling.
