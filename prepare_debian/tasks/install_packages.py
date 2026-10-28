@@ -5,6 +5,7 @@ PACKAGES: list[str] = [
     "default-jre-headless",
     "gedit",
     "git",
+    "gowitness",
     "impacket-scripts",
     "kali-root-login",
     "masscan",

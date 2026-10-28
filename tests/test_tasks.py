@@ -27,6 +27,7 @@ def test_install_packages_include_requested_system_tools() -> None:
         "accountsservice",
         "default-jre-headless",
         "gedit",
+        "gowitness",
         "impacket-scripts",
         "kali-root-login",
         "masscan",
