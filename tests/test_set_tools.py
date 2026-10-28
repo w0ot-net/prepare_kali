@@ -94,7 +94,7 @@ def test_detached_checkout_is_reattached_to_default_branch(tmp_path: Path) -> No
     assert head(checkout) == second
 
 
-def test_dirty_checkout_is_preserved(tmp_path: Path) -> None:
+def test_dirty_checkout_is_preserved_and_skipped(tmp_path: Path) -> None:
     remote, seed, first = make_remote(tmp_path)
     tools = tmp_path / "tools"
     assert set_tools.synchronize_repository(spec(remote), tools) is True
@@ -102,7 +102,7 @@ def test_dirty_checkout_is_preserved(tmp_path: Path) -> None:
     (checkout / "local.txt").write_text("keep\n", encoding="utf-8")
     advance_remote(seed, "two")
 
-    assert set_tools.synchronize_repository(spec(remote), tools) is False
+    assert set_tools.synchronize_repository(spec(remote), tools) is True
     assert head(checkout) == first
     assert (checkout / "local.txt").read_text(encoding="utf-8") == "keep\n"
 

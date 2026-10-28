@@ -63,8 +63,8 @@ def synchronize_repository(spec: RepositorySpec, tools_dir: Path = TOOLS_DIR) ->
         if status is None:
             return False
         if status:
-            output_utils.warn(f"{path} has local changes; refusing to modify it.")
-            return False
+            output_utils.warn(f"{path} has local changes; skipping its update.")
+            return True
 
     previous = _command_value(path, "rev-parse", "HEAD")
     if previous is None:
