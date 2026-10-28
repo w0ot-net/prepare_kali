@@ -31,6 +31,7 @@ def test_install_packages_include_requested_system_tools() -> None:
         "impacket-scripts",
         "kali-root-login",
         "masscan",
+        "nuclei",
         "open-vm-tools",
         "open-vm-tools-desktop",
         "snmp",

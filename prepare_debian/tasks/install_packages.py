@@ -9,6 +9,7 @@ PACKAGES: list[str] = [
     "impacket-scripts",
     "kali-root-login",
     "masscan",
+    "nuclei",
     "open-vm-tools",
     "open-vm-tools-desktop",
     "proxychains4",
