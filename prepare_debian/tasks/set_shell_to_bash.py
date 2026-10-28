@@ -1,8 +1,24 @@
 import os
 import pwd
 from pathlib import Path
+from typing import Optional
 
 from prepare_debian.utils import output_utils, process_utils
+
+
+def local_usernames(path: Path = Path("/etc/passwd")) -> Optional[set[str]]:
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError as exc:
+        output_utils.warn(f"Could not read local user database {path}: {exc}")
+        return None
+
+    usernames = set()
+    for line in lines:
+        fields = line.split(":")
+        if len(fields) >= 7 and fields[0]:
+            usernames.add(fields[0])
+    return usernames
 
 
 def ensure_default_shell_bash() -> bool:
@@ -17,9 +33,15 @@ def ensure_default_shell_bash() -> bool:
         )
         return False
 
+    local_users = local_usernames()
+    if local_users is None:
+        return False
+
     changed_any = False
     success = True
     for user in pwd.getpwall():
+        if user.pw_name not in local_users:
+            continue
         if user.pw_shell in ("/usr/sbin/nologin", "/bin/false", ""):
             continue
         if user.pw_uid != 0 and user.pw_uid < 1000:

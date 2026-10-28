@@ -101,3 +101,28 @@ def test_shell_task_reports_missing_root_privileges() -> None:
         assert set_shell_to_bash.main() is False
 
     run.assert_not_called()
+
+
+def test_shell_task_changes_local_root_but_skips_nss_greeter() -> None:
+    root = mock.Mock(pw_name="root", pw_uid=0, pw_shell="/bin/zsh")
+    greeter = mock.Mock(
+        pw_name="gdm-greeter", pw_uid=61184, pw_shell="/bin/sh"
+    )
+    result = mock.Mock(returncode=0, stderr="")
+    with (
+        mock.patch.object(set_shell_to_bash.os.path, "exists", return_value=True),
+        mock.patch.object(set_shell_to_bash.os, "geteuid", return_value=0),
+        mock.patch.object(
+            set_shell_to_bash, "local_usernames", return_value={"root"}
+        ),
+        mock.patch.object(
+            set_shell_to_bash.pwd, "getpwall", return_value=[root, greeter]
+        ),
+        mock.patch.object(set_shell_to_bash.Path, "exists", return_value=False),
+        mock.patch.object(
+            set_shell_to_bash.process_utils, "run", return_value=result
+        ) as run,
+    ):
+        assert set_shell_to_bash.main() is True
+
+    run.assert_called_once_with(["chsh", "-s", "/bin/bash", "root"])
