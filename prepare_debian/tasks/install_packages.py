@@ -3,6 +3,7 @@ from prepare_debian.utils import apt_utils
 PACKAGES: list[str] = [
     "accountsservice",
     "default-jre-headless",
+    "enum4linux",
     "gedit",
     "git",
     "gowitness",

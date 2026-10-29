@@ -26,6 +26,7 @@ def test_install_packages_include_requested_system_tools() -> None:
     assert {
         "accountsservice",
         "default-jre-headless",
+        "enum4linux",
         "gedit",
         "gowitness",
         "impacket-scripts",
